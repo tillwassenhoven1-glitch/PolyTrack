@@ -6,9 +6,17 @@ Ein Low-Poly-Rennspiel im Browser: Rase über Strecken mit Loopings, Wandfahrten
 
 👉 https://tillwassenhoven1-glitch.github.io/PolyTrack/
 
-Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.5 · Open Beta**
+Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.6 · Open Beta**
 
-## 🆕 Neu in Version 0.1.5
+## 🆕 Neu in Version 0.1.6
+
+- 🏎️ **Realistischeres Auto**: Sportwagen-Form mit Radkästen, schräger Frontscheibe, Spiegeln, Scheinwerfern, Auspuff, Frontsplitter und Heckflügel
+- 🔢 **Startnummer**: Eigene Zahl (0–99) in der Garage eintippen oder würfeln – sitzt passend auf Türen und Motorhaube
+- 🪨 **Schwereres Auto**: Du hebst nicht mehr so leicht ab und fliegst weniger weit
+- ⛰️ Landschafts-Hügel stehen nicht mehr auf der Strecke
+- 🌀 Steilkurven-Fix: kein ungewolltes Abheben mehr nach Buckeln
+
+## Neu in Version 0.1.5
 
 - 🧈 **Keine Stufen mehr**: Loopings, Korkenzieher, Wände, Steilkurven und Rampen haben jetzt einen fließenden Verlauf – das Auto und die Kamera wackeln nicht mehr
 - 🚦 **Start im Editor**: Das Auto schaut beim Start automatisch in Fahrtrichtung bzw. Richtung Ziel, egal wie der Start gedreht ist
