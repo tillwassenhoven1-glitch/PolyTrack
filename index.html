@@ -112,7 +112,7 @@ label{font-size:14px}
     <button class="btn" data-go="garage">🎨 Garage</button>
     <button class="btn" data-go="settings">⚙️ Einstellungen</button>
   </div>
-  <div class="ver">Version 0.1.4 · Open Beta</div>
+  <div class="ver">Version 0.1.5 · Open Beta</div>
 </div></div>
 
 <!-- Streckenwahl -->
@@ -210,7 +210,7 @@ label{font-size:14px}
 </div></div>
 
 <div id="toast" style="opacity:0"></div>
-<div id="ver">Poly Rush 3D · v0.1.4 Open Beta</div>
+<div id="ver">Poly Rush 3D · v0.1.5 Open Beta</div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -288,7 +288,7 @@ const PIECES = {
   loopR:    { name: 'Looping rechts', icon: '🔃', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1]], ports: [[0, 0, 2, 0], [-1, 1, 0, 0]], path: loopPath(-1), segs: 72, guide: true },
   wallL:    { name: 'Wandfahrt links', icon: '🧱', cells: [[0, 0], [0, 1], [0, 2]], ports: [[0, 0, 2, 0], [0, 2, 0, 0]], path: bankPath(longStraight(3), wallPhi, -1), segs: 40, guide: true },
   wallR:    { name: 'Wandfahrt rechts', icon: '🧱', cells: [[0, 0], [0, 1], [0, 2]], ports: [[0, 0, 2, 0], [0, 2, 0, 0]], path: bankPath(longStraight(3), wallPhi, 1), segs: 40, guide: true },
-  bank:     { name: 'Steilkurve', icon: '🌀', cells: C3, ports: [[0, 0, 2, 0], [2, 2, 1, 0]], path: bankPath(arcPath(2.5 * TILE, 2.5 * TILE, -TILE / 2), bankPhi, -1), segs: 34 },
+  bank:     { name: 'Steilkurve', icon: '🌀', cells: C3, ports: [[0, 0, 2, 0], [2, 2, 1, 0]], path: bankPath(arcPath(2.5 * TILE, 2.5 * TILE, -TILE / 2), bankPhi, -1), segs: 40, noLaunch: true },
   bigloopL: { name: 'Riesen-Looping L', icon: '🎡', cells: [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2]], ports: [[0, 0, 2, 0], [1, 2, 0, 0]], path: loopPath(1, 12, 3 * TILE), segs: 100, guide: true },
   bigloopR: { name: 'Riesen-Looping R', icon: '🎢', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1], [0, 2], [-1, 2]], ports: [[0, 0, 2, 0], [-1, 2, 0, 0]], path: loopPath(-1, 12, 3 * TILE), segs: 100, guide: true },
   tall:     { name: 'Hohe Rampe', icon: '🗻', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 4]], path: s => ({ p: [0, 4 * LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + s * 2 * TILE] }), segs: 32 },
@@ -332,7 +332,8 @@ function pieceFrames(pl, segs) {
 
 // ---------- Dreiecks-Gitter für Raycasts ----------
 class TriGrid {
-  constructor(tris, pieceIdx, cell = 6) {
+  constructor(tris, pieceIdx, vn, cell = 6) {
+    this.vn = vn;
     const n = tris.length / 9; this.t = tris; this.n = new Float32Array(n * 3); this.pc = pieceIdx; this.cell = cell;
     this.map = new Map(); this.stamp = new Uint32Array(n); this.cur = 1;
     for (let i = 0; i < n; i++) {
@@ -349,7 +350,7 @@ class TriGrid {
     const c = this.cell, e = [o[0] + d[0] * maxT, o[1] + d[1] * maxT, o[2] + d[2] * maxT];
     const lo = [0, 1, 2].map(k => Math.floor((Math.min(o[k], e[k]) - 0.01) / c)), hi = [0, 1, 2].map(k => Math.floor((Math.max(o[k], e[k]) + 0.01) / c));
     if ((hi[0] - lo[0] + 1) * (hi[1] - lo[1] + 1) * (hi[2] - lo[2] + 1) > 4000) return null;
-    const st = ++this.cur; let best = null, bt = maxT; const T = this.t;
+    const st = ++this.cur; let best = null, bt = maxT, bu = 0, bv = 0; const T = this.t;
     for (let x = lo[0]; x <= hi[0]; x++) for (let y = lo[1]; y <= hi[1]; y++) for (let z = lo[2]; z <= hi[2]; z++) {
       const arr = this.map.get(this.key(x, y, z)); if (!arr) continue;
       for (const i of arr) {
@@ -365,11 +366,18 @@ class TriGrid {
         const qx = ty * e1z - tz * e1y, qy = tz * e1x - tx * e1z, qz = tx * e1y - ty * e1x;
         const v = (d[0] * qx + d[1] * qy + d[2] * qz) * inv; if (v < 0 || u + v > 1) continue;
         const t = (e2x * qx + e2y * qy + e2z * qz) * inv;
-        if (t >= 0 && t < bt) { bt = t; best = i; }
+        if (t >= 0 && t < bt) { bt = t; best = i; bu = u; bv = v; }
       }
     }
     if (best === null) return null;
-    return { t: bt, p: vadds(o, d, bt), n: [this.n[best * 3], this.n[best * 3 + 1], this.n[best * 3 + 2]], piece: this.pc[best] };
+    // weich interpolierte Normale -> keine Stufen an den Kanten
+    let n = [this.n[best * 3], this.n[best * 3 + 1], this.n[best * 3 + 2]];
+    if (this.vn) {
+      const V = this.vn, q = best * 9, w0 = 1 - bu - bv;
+      const sn = vnorm([V[q] * w0 + V[q + 3] * bu + V[q + 6] * bv, V[q + 1] * w0 + V[q + 4] * bu + V[q + 7] * bv, V[q + 2] * w0 + V[q + 5] * bu + V[q + 8] * bv]);
+      if (vdot(sn, n) > 0.5) n = sn;
+    }
+    return { t: bt, p: vadds(o, d, bt), n, piece: this.pc[best] };
   }
 }
 
@@ -377,10 +385,15 @@ class TriGrid {
 // Farbindizes: 0 Straße, 1 Randstein A, 2 Randstein B, 3 Seite, 4 Unterseite, 5 Boost, 6 Start/Ziel-Linie hell, 7 Linie dunkel
 function buildTrack(track) {
   const phys = [], physPc = [], vis = [], visC = [], gates = [], pillars = [], guides = {}, tunnels = [];
-  let start = null, minY = 0, cpCount = 0;
+  let start = null, minY = 0, cpCount = 0, startPl = null, startIdx = -1, startDraw = null;
   const bounds = { x0: 1e9, x1: -1e9, z0: 1e9, z1: -1e9 };
-  const tri = (A, B, C, ci) => { vis.push(...A, ...B, ...C); visC.push(ci, ci, ci); };
-  const quad = (A, B, C, D, ci) => { tri(A, B, C, ci); tri(B, D, C, ci); };
+  const physN = [], visN = [];
+  const tri = (A, B, C, ci, nA, nB, nC) => {
+    vis.push(...A, ...B, ...C); visC.push(ci, ci, ci);
+    if (!nA) { nA = nB = nC = vnorm(vcross(vsub(B, A), vsub(C, A))); }
+    visN.push(...nA, ...nB, ...nC);
+  };
+  const quad = (A, B, C, D, ci, nA, nB, nC, nD) => { tri(A, B, C, ci, nA, nB, nC); tri(B, D, C, ci, nB, nD, nC); };
   const offs = [-HALF_W, -HALF_W + CURB, HALF_W - CURB, HALF_W];
   track.pieces.forEach((pl, idx) => {
     const def = PIECES[pl.t]; if (!def) return;
@@ -400,8 +413,9 @@ function buildTrack(track) {
       for (let k = 0; k < 3; k++) {
         const ci = k === 1 ? 0 : (def.segs <= 2 ? (k === 0 ? 1 : 2) : alt);
         // linke Kante = -rechts. Reihenfolge so, dass Normale = oben
-        quad(a.pts[k], a.pts[k + 1], b.pts[k], b.pts[k + 1], ci);
+        quad(a.pts[k], a.pts[k + 1], b.pts[k], b.pts[k + 1], ci, a.u, a.u, b.u, b.u);
         phys.push(...a.pts[k], ...a.pts[k + 1], ...b.pts[k], ...a.pts[k + 1], ...b.pts[k + 1], ...b.pts[k]); physPc.push(idx, idx);
+        physN.push(...a.u, ...a.u, ...b.u, ...a.u, ...b.u, ...b.u);
       }
       quad(a.pts[0], a.bot[0], b.pts[0], b.bot[0], 3);
       quad(a.bot[1], a.pts[3], b.bot[1], b.pts[3], 3);
@@ -421,20 +435,23 @@ function buildTrack(track) {
         quad(tip, l, tip2, l2, 5); quad(r, tip, r2, tip2, 5);
       }
     }
-    if (def.gate) {
+    const drawLine = (mid, gate) => {
       const n = 8;
       for (let k = 0; k < n; k++) for (let row = 0; row < 2; row++) {
         const x0 = -HALF_W + CURB + k * (2 * (HALF_W - CURB) / n), x1 = x0 + 2 * (HALF_W - CURB) / n;
         const z0 = -0.8 + row * 0.8, z1 = z0 + 0.8;
         const P = (x, z) => vadds(vadds(vadds(mid.p, mid.r, x), mid.f, z), mid.u, 0.03);
-        const ci = def.gate === 'finish' || def.gate === 'start' ? ((k + row) % 2 ? 6 : 7) : 6;
-        if (def.gate === 'cp' && row === 1) continue;
+        const ci = gate === 'finish' || gate === 'start' ? ((k + row) % 2 ? 6 : 7) : 6;
+        if (gate === 'cp' && row === 1) continue;
         quad(P(x0, z0), P(x1, z0), P(x0, z1), P(x1, z1), ci);
       }
+    };
+    if (def.gate === 'start') { if (!startPl) { startPl = pl; startIdx = idx; startDraw = drawLine; } }
+    else if (def.gate) {
+      drawLine(mid, def.gate);
       const g = { type: def.gate, p: mid.p, f: mid.f, r: mid.r, u: mid.u, piece: idx, id: idx };
       gates.push(g);
       if (def.gate === 'cp') cpCount++;
-      if (def.gate === 'start' && !start) { const sp = pieceFrames(pl, 20)[14]; start = { p: sp.p, f: sp.f, u: sp.u }; }
     }
     if (def.guide) guides[idx] = pieceFrames(pl, 140);
     if (def.tunnel) tunnels.push(mid);
@@ -442,8 +459,24 @@ function buildTrack(track) {
       for (const k of [0, 0.5, 1]) { const F = fr[Math.round(k * (fr.length - 1))]; if (F.u[1] > 0.8 && F.p[1] > 1.6) pillars.push({ p: vadds(F.p, F.u, -1.2), h: F.p[1] - 1.2 }); }
     }
   });
+  const grid = new TriGrid(new Float32Array(phys), Int32Array.from(physPc), new Float32Array(physN));
+  // Start automatisch in Fahrtrichtung ausrichten (dahin, wo die Strecke weitergeht / zum Ziel)
+  if (startPl) {
+    const fr = pieceFrames(startPl, 20), c = fr[10];
+    const conn = sg => { const p = vadds(vadds(c.p, c.f, sg * (TILE / 2 + 3)), c.u, 5); const h = grid.raycast(p, vsc(c.u, -1), 10); return !!(h && h.piece !== startIdx); };
+    const fw = conn(1), bw = conn(-1);
+    let dir = 1;
+    if (bw && !fw) dir = -1;
+    else if (!fw && !bw) { const fin = gates.find(g => g.type === 'finish'); if (fin && vdot(vsub(fin.p, c.p), c.f) < 0) dir = -1; }
+    const gf = fr[dir > 0 ? 3 : 17], sp = fr[dir > 0 ? 14 : 6];
+    const flip = F => ({ ...F, f: vsc(F.f, dir), r: vsc(F.r, dir) });
+    startDraw(gf, 'start');
+    const G0 = flip(gf);
+    gates.push({ type: 'start', p: G0.p, f: G0.f, r: G0.r, u: G0.u, piece: startIdx, id: startIdx });
+    start = { p: sp.p, f: vsc(sp.f, dir), u: sp.u };
+  }
   return {
-    grid: new TriGrid(new Float32Array(phys), Int32Array.from(physPc)),
+    grid, visN: new Float32Array(visN),
     vis: new Float32Array(vis), visC: Uint8Array.from(visC), gates, pillars, tunnels, start, cpCount, minY, bounds, guides, pieces: track.pieces,
   };
 }
@@ -530,7 +563,7 @@ function stepCar(car, W, inp, dt) {
     const h = probe(car, W, 1.0, n, 1);
     if (h) {
       // Kuppen: biegt die Bahn schneller weg als die Schwerkraft das Auto runterzieht -> abheben
-      const conv = h.piece === -2 || W.guides[h.piece] || W.guides[car.piece] ? 0 : vdot(vsub(h.n, n), f) / dt;
+      const conv = h.piece === -2 || W.guides[h.piece] || W.guides[car.piece] || def.noLaunch ? 0 : vdot(vsub(h.n, n), f) / dt;
       car.convEma = (car.convEma || 0) + (conv - (car.convEma || 0)) * Math.min(1, 9 * dt);
       const fwd = vdot(v, f);
       if (fwd > 14 && n[1] > 0.3 && fwd * car.convEma > GRAV * n[1] * 1.1) {
@@ -709,7 +742,7 @@ const OFFICIAL = [
 ];
 function officialTrack(i) { const o = OFFICIAL[i]; const { pieces, order } = turtle(o.spec); return { name: o.name, env: o.env, sun: o.sun, pieces, order, official: i }; }
 
-const AUTHOR = [9.337, 13.312, 17.881, 10.299, 16.694, 16.028, 21.775, 10.968, 11.157, 13.297, 13.323, 9.348, 14.985, 15.176, 18.58, 15.812, 21.17, 16.773, 18.437, 34.105, 31.105, 25.683, 20.922, 19.87, 26.012, 26.826, 33.972, 21.853, 18.77, 18.886, 19.788];
+const AUTHOR = [9.208, 13.142, 17.098, 10.234, 16.422, 16.009, 21.811, 10.997, 11.008, 12.822, 13.086, 9.318, 14.356, 15.139, 18.471, 15.237, 20.385, 16.563, 18.118, 34.775, 31.24, 25.456, 20.876, 20.134, 25.85, 26.805, 33.563, 21.853, 17.456, 18.939, 20.153];
 OFFICIAL.forEach((o, i) => o.author = AUTHOR[i]);
 
 /* ================= Poly Rush 3D – Spiel (Grafik, UI, Editor) ================= */
@@ -730,7 +763,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in win
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- Einstellungen ----------
-const VERSION = '0.1.4';
+const VERSION = '0.1.5';
 const DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], drift: ['Space', 'ShiftLeft'], restart: ['KeyR', 'Enter'], checkpoint: ['Backspace'], camera: ['KeyC'], pause: ['Escape'] };
 const KEY_NAMES = { up: 'Gas', down: 'Bremse / Rückwärts', left: 'Links', right: 'Rechts', drift: 'Driften', restart: 'Neustart', checkpoint: 'Zum Checkpoint', camera: 'Kamera wechseln', pause: 'Pause' };
 const settings = Object.assign({ name: 'Spieler', ghosts: 3, shadows: true, sound: true, quality: 'hoch', cam: 0 }, store.get('settings', {}));
@@ -797,7 +830,8 @@ function buildTrackMesh(W, envName, opts = {}) {
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(W.vis, 3));
     const col = new Float32Array(W.vis.length);
     for (let i = 0; i < W.visC.length; i++) { const c = pal[W.visC[i]]; col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; }
-    geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    if (W.visN && W.visN.length === W.vis.length) geo.setAttribute('normal', new THREE.BufferAttribute(W.visN, 3)); else geo.computeVertexNormals();
     const mat = opts.ghost ? new THREE.MeshBasicMaterial({ color: opts.ghost, transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide })
       : new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
     const m = new THREE.Mesh(geo, mat); m.castShadow = !opts.ghost; m.receiveShadow = !opts.ghost; grp.add(m);
@@ -1545,6 +1579,8 @@ function edPlace() {
     const same = ED.track.pieces.findIndex(p => p.t === pl.t && p.x === pl.x && p.z === pl.z && p.y === pl.y && p.r === pl.r); if (same >= 0) return;
     edSnapshot();
     if (pl.t === 'start') ED.track.pieces = ED.track.pieces.filter(p => p.t !== 'start');
+    // Teile an derselben Stelle & Höhe werden ersetzt (sonst entstehen Stufen); mit Alt/Strg überlappen lassen
+    if (!ED.overlap) { const mine = pieceCells(pl).map(c => c.join(',')); ED.track.pieces = ED.track.pieces.filter(p => p.y !== pl.y || !pieceCells(p).some(c => mine.includes(c.join(',')))); }
     ED.track.pieces.push(pl); beep(660, 0.06, 'triangle', 0.06);
   }
   edRebuild(); edPreviewBuild();
@@ -1587,6 +1623,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   if (mode !== 'editor') return;
   ptrs.delete(e.pointerId);
   if (drag && !drag.pinch && drag.moved < 10 && drag.btn === 0) {
+    ED.overlap = e.altKey || e.ctrlKey;
     if (e.pointerType !== 'mouse') edHoverFrom(e.clientX, e.clientY);
     if (drag.shift) { const d = ED.del; ED.del = true; edPlace(); ED.del = d; } else edPlace();
   }
