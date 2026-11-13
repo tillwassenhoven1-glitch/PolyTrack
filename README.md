@@ -1,12 +1,23 @@
 # 🏎️ Poly Rush 3D
 
-Ein Low-Poly-Rennspiel im Browser: Rase über Strecken mit Loopings, Sprüngen und scharfen Kurven – gegen die Uhr, auf die Millisekunde genau. Schlag deine eigenen Geister und bau dir im Editor eigene Strecken!
+Ein Low-Poly-Rennspiel im Browser: Rase über Strecken mit Loopings, Wandfahrten, Steilkurven, Sprüngen und scharfen Kurven – gegen die Uhr, auf die Millisekunde genau. Schlag deine eigenen Geister und bau dir im Editor eigene Strecken!
 
 ## ▶️ Jetzt spielen
 
 👉 https://tillwassenhoven1-glitch.github.io/PolyTrack/
 
-Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1 · Open Beta**
+Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.1 · Open Beta**
+
+## 🆕 Neu in Version 0.1.1
+
+- 🔥 **Driften!** Mit der Leertaste (oder der DRIFT-Taste am Handy) rutschst du quer um die Kurven – mit Reifenrauch und Sound
+- 🧱 **Wandfahrten** – die Straße kippt zur Seite und du fährst an der Wand entlang
+- 🌀 **Steilkurven**, 🎡 **Riesen-Loopings**, 🗻 **hohe Rampen** und 〰️ **Buckel**, über die du abhebst
+- 🏁 **4 neue Strecken**: Wandläufer, Achterbahn, Eiskanal und Canyon-Gipfel – mit viel mehr Höhe
+- 📲 Handy & iPad: Steuerung mit ◀ ▶ ▲ ▼ und eigener DRIFT-Taste
+- ⌨️ Tastenbelegung: jetzt **2 Tasten pro Aktion** frei einstellbar
+- ⛰️ Mehr Landschaft mit Hügeln rund um die Strecken
+- 🏷️ Versionsanzeige unten links
 
 ## So funktioniert's
 
@@ -18,11 +29,11 @@ Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy
 
 ## Strecken
 
-- 🌍 **15 offizielle Strecken** in drei Welten:
-  - ☀️ **Sommer** – 7 Strecken
-  - ❄️ **Winter** – 4 Strecken
-  - 🏜️ **Wüste** – 4 Strecken
-- 🔄 Loopings, 🛫 Schanzen, ⛰️ Rampen, ⚡ Booster und große & enge Kurven
+- 🌍 **19 offizielle Strecken** in drei Welten:
+  - ☀️ **Sommer** – 9 Strecken
+  - ❄️ **Winter** – 5 Strecken
+  - 🏜️ **Wüste** – 5 Strecken
+- 🔄 Loopings, 🎡 Riesen-Loopings, 🧱 Wandfahrten, 🌀 Steilkurven, 🛫 Schanzen, 🗻 hohe Rampen, 〰️ Buckel, ⚡ Booster und große & enge Kurven
 - 🏅 Medaillen auf jeder offiziellen Strecke: 💎 Autor, 🥇 Gold, 🥈 Silber, 🥉 Bronze
 
 ## Features
@@ -30,13 +41,14 @@ Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy
 - 👻 Fahr gegen **bis zu 10 Geister** gleichzeitig – deine besten Läufe als durchsichtige Autos
 - 👁️ Wiederholungen: Schau dir deine besten Läufe nochmal an
 - 🏆 Bestenliste (Top 10) für jede Strecke, mit Spielername und Datum
-- 🛠️ **Strecken-Editor** mit 12 Bauteilen – bauen, testen, speichern
+- 🔥 Driften mit Reifenrauch
+- 🛠️ **Strecken-Editor** mit 19 Bauteilen – bauen, testen, speichern
 - 📤 Strecken als Code **exportieren** und mit Freunden **teilen** – 📥 importieren mit einem Klick
 - 🎨 **Garage**: Lackfarbe, Zweitfarbe, 5 Lackmuster und 4 Felgen-Designs
 - 🎥 3 Kamera-Perspektiven (Verfolger, Weit, Motorhaube)
 - 🌗 Echtzeit-Schatten und einstellbarer Sonnenstand
-- ⌨️ Frei belegbare Tasten
-- 🎮 Gamepad-Unterstützung
+- ⌨️ Frei belegbare Tasten (2 pro Aktion)
+- 🎮 Gamepad-Unterstützung (X / RB zum Driften)
 - 🔊 Motor-Sound, Checkpoint- und Ziel-Sounds
 - 📲 Touch-Steuerung fürs Handy/iPad
 - 💾 Zeiten, Geister, Strecken und Auto werden in deinem Browser gespeichert
@@ -49,6 +61,7 @@ Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy
 | Gas | W / ↑ | ▲ |
 | Bremsen / Rückwärts | S / ↓ | ▼ |
 | Lenken | A / D oder ← / → | ◀ ▶ |
+| Driften | Leertaste / Shift links | DRIFT |
 | Neustart | R / Enter | 🔄 |
 | Zum letzten Checkpoint | ⌫ Rücktaste | 📍 |
 | Kamera wechseln | C | 🎥 |
