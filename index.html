@@ -112,7 +112,7 @@ label{font-size:14px}
     <button class="btn" data-go="garage">🎨 Garage</button>
     <button class="btn" data-go="settings">⚙️ Einstellungen</button>
   </div>
-  <div class="ver">Version 0.1.2 · Open Beta</div>
+  <div class="ver">Version 0.1.3 · Open Beta</div>
 </div></div>
 
 <!-- Streckenwahl -->
@@ -210,7 +210,7 @@ label{font-size:14px}
 </div></div>
 
 <div id="toast" style="opacity:0"></div>
-<div id="ver">Poly Rush 3D · v0.1.2 Open Beta</div>
+<div id="ver">Poly Rush 3D · v0.1.3 Open Beta</div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -300,9 +300,12 @@ const PIECES = {
   tunnel:   { name: 'Tunnel', icon: '🚇', cells: [[0, 0]], ports: ST, path: straightPath, segs: 2, tunnel: true },
   climbL:   { name: 'Spirale links', icon: '🌀', cells: [[0, 0], [1, 0], [0, 1], [1, 1]], ports: [[0, 0, 2, 0], [1, 1, 1, 2]], path: climbPath(1), segs: 30 },
   climbR:   { name: 'Spirale rechts', icon: '🌀', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1]], ports: [[0, 0, 2, 0], [-1, 1, 3, 2]], path: climbPath(-1), segs: 30 },
+  hill:     { name: 'Hügel', icon: '⛰️', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 0]], path: s => ({ p: [0, 6 * Math.sin(Math.PI * s) ** 2, -TILE / 2 + 2 * TILE * s] }), segs: 32 },
+  rough:    { name: 'Holperpiste', icon: '🪨', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 0]], path: s => ({ p: [0, 0.8 * Math.sin(Math.PI * s * 6) ** 2, -TILE / 2 + 2 * TILE * s] }), segs: 60 },
+  camel:    { name: 'Doppelhügel', icon: '🐫', cells: [[0, 0], [0, 1], [0, 2]], ports: [[0, 0, 2, 0], [0, 2, 0, 0]], path: s => ({ p: [0, 4.5 * Math.sin(2 * Math.PI * s) ** 2, -TILE / 2 + 3 * TILE * s] }), segs: 60 },
   bump:     { name: 'Buckel', icon: '〰️', cells: [[0, 0]], ports: ST, path: s => ({ p: [0, 2.4 * Math.sin(Math.PI * s) ** 2, -TILE / 2 + s * TILE] }), segs: 24 },
 };
-const PIECE_ORDER = ['road', 'start', 'cp', 'finish', 'boost', 'curve', 'bigcurve', 'slope', 'steep', 'jump', 'loopL', 'loopR', 'wallL', 'wallR', 'bank', 'bigloopL', 'bigloopR', 'tall', 'bump', 'scurveL', 'scurveR', 'cork', 'wave', 'bigjump', 'tunnel', 'climbL', 'climbR'];
+const PIECE_ORDER = ['road', 'start', 'cp', 'finish', 'boost', 'curve', 'bigcurve', 'slope', 'steep', 'jump', 'loopL', 'loopR', 'wallL', 'wallR', 'bank', 'bigloopL', 'bigloopR', 'tall', 'bump', 'scurveL', 'scurveR', 'cork', 'wave', 'bigjump', 'tunnel', 'climbL', 'climbR', 'hill', 'rough', 'camel'];
 
 function rotXZ(x, z, r) { const a = r * Math.PI / 2, c = Math.cos(a), s = Math.sin(a); return [x * c + z * s, -x * s + z * c]; }
 function toWorld(l, pl) { const [x, z] = rotXZ(l[0], l[2], pl.r); return [x + pl.x * TILE, l[1] + pl.y * LVL, z + pl.z * TILE]; }
@@ -645,6 +648,9 @@ function turtle(spec) {
     else if (tok === 'TU') put('tall', 0, 4);
     else if (tok === 'TD') put('tall', 0, -4);
     else if (tok === 'H') put('bump', 0, 0);
+    else if (tok === 'HG') put('hill', 0, 0);
+    else if (tok === 'HR') put('rough', 0, 0);
+    else if (tok === 'HC') put('camel', 0, 0);
     else if (tok === 'SL') put('scurveL', 0, 0);
     else if (tok === 'SR') put('scurveR', 0, 0);
     else if (tok === 'X') put('cork', 0, 0);
@@ -695,10 +701,15 @@ const OFFICIAL = [
   { name: 'Wüstenachterbahn', env: 'desert', sun: 70, spec: 'B S TU S C RD S RD S C V S H H S GL S C SR SL S M3 S3 C KL S2 F' },
   { name: 'Pyramidensprung', env: 'desert', sun: 62, spec: 'S2 UU S UU S UU S C M4-6 S3 C BR S X S OR S2 C WL S B S J2 S3 F' },
   { name: 'Todesspirale', env: 'desert', sun: 78, spec: 'B S LU S2 RU S C X S GR S2 C TU B2 M3-4 S3 C BL S WR S V S KL B S OL S C SL SR S H H S2 F' },
+  // neu in 0.1.3
+  { name: 'Hügelhüpfer', env: 'summer', sun: 48, spec: 'B S HG S H S HG C S V S BR B S HC S H H S C HR S HG S BL S V S2 F' },
+  { name: 'Buckelpiste', env: 'winter', sun: 20, spec: 'S HR S H S C HG S HC S KR B S V V S C HG S H S2 F' },
+  { name: 'Dünenmeer', env: 'desert', sun: 72, spec: 'B S HC S HG S C HG S V S BL S HR S HC C B S H H H S2 F' },
+  { name: 'Holper-Express', env: 'summer', sun: 58, spec: 'B2 S HG HG S C OL S HC S BR S V S HR C S X S HG S2 F' },
 ];
 function officialTrack(i) { const o = OFFICIAL[i]; const { pieces, order } = turtle(o.spec); return { name: o.name, env: o.env, sun: o.sun, pieces, order, official: i }; }
 
-const AUTHOR = [8.435, 12.501, 15.939, 9.964, 15.33, 15.671, 20.901, 10.642, 10.308, 11.497, 12.374, 8.811, 13.64, 14.485, 17.526, 14.333, 19.044, 15.838, 17.254, 31.776, 28.308, 24.195, 19.696, 18.745, 25.147, 24.946, 32.369];
+const AUTHOR = [8.435, 12.501, 15.939, 9.964, 15.33, 15.671, 20.901, 10.642, 10.308, 11.497, 12.374, 8.811, 13.64, 14.485, 17.526, 14.333, 19.044, 15.838, 17.254, 31.776, 28.308, 24.195, 19.696, 18.745, 25.147, 24.946, 32.369, 19.65, 17.07, 16.701, 17.549];
 OFFICIAL.forEach((o, i) => o.author = AUTHOR[i]);
 
 /* ================= Poly Rush 3D – Spiel (Grafik, UI, Editor) ================= */
@@ -719,7 +730,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in win
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- Einstellungen ----------
-const VERSION = '0.1.2';
+const VERSION = '0.1.3';
 const DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], drift: ['Space', 'ShiftLeft'], restart: ['KeyR', 'Enter'], checkpoint: ['Backspace'], camera: ['KeyC'], pause: ['Escape'] };
 const KEY_NAMES = { up: 'Gas', down: 'Bremse / Rückwärts', left: 'Links', right: 'Rechts', drift: 'Driften', restart: 'Neustart', checkpoint: 'Zum Checkpoint', camera: 'Kamera wechseln', pause: 'Pause' };
 const settings = Object.assign({ name: 'Spieler', ghosts: 3, shadows: true, sound: true, quality: 'hoch', cam: 0 }, store.get('settings', {}));
@@ -835,9 +846,9 @@ function buildWorld(W, envName, track, withDecor = true) {
   }
   if (!withDecor) return grp;
   const hMat = lambert(E.ground2, { flatShading: true }), hMat2 = lambert(E.mount, { flatShading: true });
-  for (let i = 0; i < 40; i++) {
-    const a = R() * Math.PI * 2, rx = (W.bounds.x1 - W.bounds.x0) / 2 + 120 + R() * 380, rz = (W.bounds.z1 - W.bounds.z0) / 2 + 120 + R() * 380;
-    const r = 30 + R() * 70, h = 12 + R() * 45;
+  for (let i = 0; i < 110; i++) {
+    const near = i < 50, a = R() * Math.PI * 2, rx = (W.bounds.x1 - W.bounds.x0) / 2 + (near ? 50 + R() * 90 : 120 + R() * 380), rz = (W.bounds.z1 - W.bounds.z0) / 2 + (near ? 50 + R() * 90 : 120 + R() * 380);
+    const r = near ? 14 + R() * 26 : 30 + R() * 70, h = near ? 5 + R() * 14 : 12 + R() * 45;
     const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), R() < 0.7 ? hMat : hMat2);
     m.scale.set(r, h, r * (0.7 + R() * 0.6)); m.position.set(cx + Math.cos(a) * rx, -h * 0.25, cz + Math.sin(a) * rz); m.rotation.y = R() * 6; m.receiveShadow = true; grp.add(m);
   }
@@ -1068,8 +1079,8 @@ function sampleGhost(data, t, obj) {
 // ---------- Rennen ----------
 let G = null; // aktuelles Rennen
 const camState = { pos: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0), snap: true };
-const CAM_NAMES = ['Verfolger', 'Weit', 'Motorhaube'];
-function cycleCam() { settings.cam = (settings.cam + 1) % 3; saveSettings(); camState.snap = true; toast('🎥 ' + CAM_NAMES[settings.cam], 900); }
+const CAM_NAMES = ['Verfolger', 'Weit', 'Motorhaube', 'Ego-Sicht (First Person)'];
+function cycleCam() { settings.cam = (settings.cam + 1) % 4; saveSettings(); camState.snap = true; toast('🎥 ' + CAM_NAMES[settings.cam], 900); }
 function startRace(track, opts = {}) {
   const W = buildTrack(track);
   if (!W.start) { toast('⚠️ Die Strecke braucht einen Start!'); return; }
@@ -1188,7 +1199,8 @@ function updateRace(dt) {
   animateWheels(G.car, car.steer, sp, paused ? 0 : dt);
   const tGhost = G.phase === 'run' ? R.t : 0;
   for (const gh of G.ghosts) sampleGhost(gh.data, tGhost, gh.mesh);
-  updateChaseCam(G.car.position, car, dt);
+  G.car.visible = settings.cam !== 3;
+  updateChaseCam(G.car.position, G.car.quaternion, vlen(car.v), dt);
   updateSmoke(dt);
   $('#driftTag').classList.toggle('hidden', !(car.drifting && car.grounded));
   driftSound(car.drifting && car.grounded && !paused && mode === 'race');
@@ -1275,28 +1287,29 @@ function updateReplay(dt) {
   const sp = rp.lastP.distanceTo(G.replayMesh.position) / Math.max(dt, 1e-3); rp.lastP.copy(G.replayMesh.position);
   fake.v = f.clone().multiplyScalar(sp).toArray();
   animateWheels(G.replayMesh, 0, sp, dt);
-  updateChaseCam(G.replayMesh.position, fake, dt);
+  G.replayMesh.visible = settings.cam !== 3;
+  updateChaseCam(G.replayMesh.position, G.replayMesh.quaternion, sp, dt);
   $('#time').textContent = fmt(Math.min(rp.t, rp.run.t)); $('#cpInfo').textContent = ''; $('#speed').innerHTML = Math.round(sp * 3.6) + '<small>km/h</small>';
   if (rp.t > rp.dur + 1.2) endReplay();
 }
 function endReplay() { scene.remove(G.replayMesh); G.car.visible = true; for (const gh of G.ghosts) gh.mesh.visible = true; G.replay = null; mode = 'race'; showFinish(); }
 
-function updateChaseCam(pos, car, dt) {
-  const f = new THREE.Vector3(...car.f), u = new THREE.Vector3(...car.u);
-  const k = camState.snap ? 1 : 1 - Math.exp(-6 * dt);
-  camState.up.lerp(u, camState.snap ? 1 : 1 - Math.exp(-3 * dt)).normalize();
-  const U = camState.up, speed = vlen(car.v);
+function updateChaseCam(pos, q, speed, dt) {
+  // Kamera folgt einer geglätteten Ausrichtung starr -> kein Hin- und Herschwingen im Looping
+  if (camState.snap || !camState.q) camState.q = q.clone();
+  else camState.q.slerp(q, 1 - Math.exp(-(settings.cam === 3 ? 30 : settings.cam === 2 ? 14 : 6.5) * dt));
+  const Q = camState.q, F = new THREE.Vector3(0, 0, 1).applyQuaternion(Q), U = new THREE.Vector3(0, 1, 0).applyQuaternion(Q);
   let want, look;
-  if (settings.cam === 2) { want = pos.clone().addScaledVector(U, 1.25).addScaledVector(f, 0.4); look = pos.clone().addScaledVector(f, 20).addScaledVector(U, 1.0); camState.pos.copy(want); }
+  if (settings.cam === 3) { want = pos.clone().addScaledVector(U, 0.78).addScaledVector(F, -0.15); look = want.clone().addScaledVector(F, 20).addScaledVector(U, -0.6); }
+  else if (settings.cam === 2) { want = pos.clone().addScaledVector(U, 1.25).addScaledVector(F, 0.4); look = pos.clone().addScaledVector(F, 20).addScaledVector(U, 1.0); }
   else {
     const back = settings.cam === 1 ? 13 : 8.5, high = settings.cam === 1 ? 5.5 : 3.2;
-    want = pos.clone().addScaledVector(f, -back).addScaledVector(U, high);
-    camState.pos.lerp(want, settings.cam === 1 ? k : 1 - Math.exp(-9 * dt));
-    if (camState.snap) camState.pos.copy(want);
-    look = pos.clone().addScaledVector(f, 4).addScaledVector(U, 1.2);
+    want = pos.clone().addScaledVector(F, -back).addScaledVector(U, high);
+    look = pos.clone().addScaledVector(F, 4).addScaledVector(U, 1.2);
   }
-  camera.position.copy(camState.pos); camera.up.copy(U); camera.lookAt(look);
-  const fov = 68 + Math.min(22, speed * 0.28); if (Math.abs(camera.fov - fov) > 0.05) { camera.fov += (fov - camera.fov) * Math.min(1, 4 * dt); camera.updateProjectionMatrix(); }
+  camState.pos.copy(want); camState.up.copy(U);
+  camera.position.copy(want); camera.up.copy(U); camera.lookAt(look);
+  const fov = (settings.cam === 3 ? 78 : 68) + Math.min(22, speed * 0.28); if (Math.abs(camera.fov - fov) > 0.05) { camera.fov += (fov - camera.fov) * Math.min(1, 4 * dt); camera.updateProjectionMatrix(); }
   placeSun(pos);
   camState.snap = false;
 }
