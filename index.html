@@ -112,7 +112,7 @@ label{font-size:14px}
     <button class="btn" data-go="garage">🎨 Garage</button>
     <button class="btn" data-go="settings">⚙️ Einstellungen</button>
   </div>
-  <div class="ver">Version 0.1.1 · Open Beta</div>
+  <div class="ver">Version 0.1.2 · Open Beta</div>
 </div></div>
 
 <!-- Streckenwahl -->
@@ -210,7 +210,7 @@ label{font-size:14px}
 </div></div>
 
 <div id="toast" style="opacity:0"></div>
-<div id="ver">Poly Rush 3D · v0.1.1 Open Beta</div>
+<div id="ver">Poly Rush 3D · v0.1.2 Open Beta</div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -265,6 +265,12 @@ function bankPath(base, phiFn, k) {
 const wallPhi = s => 1.45 * (smooth(clamp(3 * s, 0, 1)) - smooth(clamp(3 * s - 2, 0, 1)));
 const bankPhi = s => 0.75 * smooth(clamp(s * 4, 0, 1)) * smooth(clamp((1 - s) * 4, 0, 1));
 const longStraight = n => s => ({ p: [0, 0, -TILE / 2 + s * n * TILE] });
+function corkPath(Rc) {
+  return s => { const ph = 2 * Math.PI * smooth(s); return { p: [Rc * Math.sin(ph), Rc - Rc * Math.cos(ph), -TILE / 2 + s * 3 * TILE], side: [-Math.cos(ph), -Math.sin(ph), 0] }; };
+}
+function climbPath(dir) {
+  return s => { const a = Math.PI - s * Math.PI / 2, R = 1.5 * TILE; return { p: [dir * (1.5 * TILE + R * Math.cos(a)), 2 * LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + R * Math.sin(a)] }; };
+}
 const C3 = []; for (let x = 0; x < 3; x++) for (let z = 0; z < 3; z++) C3.push([x, z]);
 const ST = [[0, 0, 2, 0], [0, 0, 0, 0]];
 const PIECES = {
@@ -273,11 +279,11 @@ const PIECES = {
   cp:       { name: 'Checkpoint', icon: '🟡', cells: [[0, 0]], ports: ST, path: straightPath, segs: 2, gate: 'cp' },
   finish:   { name: 'Ziel', icon: '🏁', cells: [[0, 0]], ports: ST, path: straightPath, segs: 2, gate: 'finish' },
   boost:    { name: 'Booster', icon: '⚡', cells: [[0, 0]], ports: ST, path: straightPath, segs: 2, boost: true },
-  curve:    { name: 'Kurve', icon: '↪️', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 1, 0]], path: arcPath(TILE / 2, TILE / 2, -TILE / 2), segs: 8 },
+  curve:    { name: 'Kurve', icon: '↪️', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 1, 0]], path: arcPath(TILE / 2, TILE / 2, -TILE / 2), segs: 12 },
   bigcurve: { name: 'Große Kurve', icon: '⤴️', cells: [[0, 0], [1, 0], [0, 1], [1, 1]], ports: [[0, 0, 2, 0], [1, 1, 1, 0]], path: arcPath(1.5 * TILE, 1.5 * TILE, -TILE / 2), segs: 18 },
-  slope:    { name: 'Rampe', icon: '📐', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 0, 1]], path: s => ({ p: [0, LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + s * TILE] }), segs: 8 },
-  steep:    { name: 'Steile Rampe', icon: '⛰️', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 0, 2]], path: s => ({ p: [0, LVL * (1 - Math.cos(Math.PI * s)), -TILE / 2 + s * TILE] }), segs: 10 },
-  jump:     { name: 'Schanze', icon: '🛫', cells: [[0, 0]], ports: ST, path: s => { const k = Math.max(0, (s - 0.3) / 0.7); return { p: [0, 3 * k * k, -TILE / 2 + s * TILE] }; }, segs: 10 },
+  slope:    { name: 'Rampe', icon: '📐', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 0, 1]], path: s => ({ p: [0, LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + s * TILE] }), segs: 16 },
+  steep:    { name: 'Steile Rampe', icon: '⛰️', cells: [[0, 0]], ports: [[0, 0, 2, 0], [0, 0, 0, 2]], path: s => ({ p: [0, LVL * (1 - Math.cos(Math.PI * s)), -TILE / 2 + s * TILE] }), segs: 20 },
+  jump:     { name: 'Schanze', icon: '🛫', cells: [[0, 0]], ports: ST, path: s => { const k = Math.max(0, (s - 0.3) / 0.7); return { p: [0, 3 * k * k, -TILE / 2 + s * TILE] }; }, segs: 18 },
   loopL:    { name: 'Looping links', icon: '🔄', cells: [[0, 0], [1, 0], [0, 1], [1, 1]], ports: [[0, 0, 2, 0], [1, 1, 0, 0]], path: loopPath(1), segs: 72, guide: true },
   loopR:    { name: 'Looping rechts', icon: '🔃', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1]], ports: [[0, 0, 2, 0], [-1, 1, 0, 0]], path: loopPath(-1), segs: 72, guide: true },
   wallL:    { name: 'Wandfahrt links', icon: '🧱', cells: [[0, 0], [0, 1], [0, 2]], ports: [[0, 0, 2, 0], [0, 2, 0, 0]], path: bankPath(longStraight(3), wallPhi, -1), segs: 40, guide: true },
@@ -285,10 +291,18 @@ const PIECES = {
   bank:     { name: 'Steilkurve', icon: '🌀', cells: C3, ports: [[0, 0, 2, 0], [2, 2, 1, 0]], path: bankPath(arcPath(2.5 * TILE, 2.5 * TILE, -TILE / 2), bankPhi, -1), segs: 34 },
   bigloopL: { name: 'Riesen-Looping L', icon: '🎡', cells: [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2]], ports: [[0, 0, 2, 0], [1, 2, 0, 0]], path: loopPath(1, 12, 3 * TILE), segs: 100, guide: true },
   bigloopR: { name: 'Riesen-Looping R', icon: '🎢', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1], [0, 2], [-1, 2]], ports: [[0, 0, 2, 0], [-1, 2, 0, 0]], path: loopPath(-1, 12, 3 * TILE), segs: 100, guide: true },
-  tall:     { name: 'Hohe Rampe', icon: '🗻', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 4]], path: s => ({ p: [0, 4 * LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + s * 2 * TILE] }), segs: 16 },
-  bump:     { name: 'Buckel', icon: '〰️', cells: [[0, 0]], ports: ST, path: s => ({ p: [0, 2.4 * Math.sin(Math.PI * s) ** 2, -TILE / 2 + s * TILE] }), segs: 12, launch: true },
+  tall:     { name: 'Hohe Rampe', icon: '🗻', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 4]], path: s => ({ p: [0, 4 * LVL * (1 - Math.cos(Math.PI * s)) / 2, -TILE / 2 + s * 2 * TILE] }), segs: 32 },
+  scurveL:  { name: 'S-Kurve links', icon: '〽️', cells: [[0, 0], [1, 0], [0, 1], [1, 1]], ports: [[0, 0, 2, 0], [1, 1, 0, 0]], path: s => ({ p: [TILE * smooth(s), 0, -TILE / 2 + 2 * TILE * s] }), segs: 20 },
+  scurveR:  { name: 'S-Kurve rechts', icon: '〽️', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1]], ports: [[0, 0, 2, 0], [-1, 1, 0, 0]], path: s => ({ p: [-TILE * smooth(s), 0, -TILE / 2 + 2 * TILE * s] }), segs: 20 },
+  cork:     { name: 'Korkenzieher', icon: '🌪️', cells: [[0, 0], [0, 1], [0, 2]], ports: [[0, 0, 2, 0], [0, 2, 0, 0]], path: corkPath(7), segs: 80, guide: true },
+  wave:     { name: 'Wellen', icon: '🌊', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 0]], path: s => ({ p: [0, 2.2 * Math.sin(2 * Math.PI * s) ** 2, -TILE / 2 + 2 * TILE * s] }), segs: 48 },
+  bigjump:  { name: 'Mega-Schanze', icon: '🚀', cells: [[0, 0], [0, 1]], ports: [[0, 0, 2, 0], [0, 1, 0, 0]], path: s => { const k = Math.max(0, (s - 0.2) / 0.8); return { p: [0, 7 * k * k, -TILE / 2 + 2 * TILE * s] }; }, segs: 30 },
+  tunnel:   { name: 'Tunnel', icon: '🚇', cells: [[0, 0]], ports: ST, path: straightPath, segs: 2, tunnel: true },
+  climbL:   { name: 'Spirale links', icon: '🌀', cells: [[0, 0], [1, 0], [0, 1], [1, 1]], ports: [[0, 0, 2, 0], [1, 1, 1, 2]], path: climbPath(1), segs: 30 },
+  climbR:   { name: 'Spirale rechts', icon: '🌀', cells: [[0, 0], [-1, 0], [0, 1], [-1, 1]], ports: [[0, 0, 2, 0], [-1, 1, 3, 2]], path: climbPath(-1), segs: 30 },
+  bump:     { name: 'Buckel', icon: '〰️', cells: [[0, 0]], ports: ST, path: s => ({ p: [0, 2.4 * Math.sin(Math.PI * s) ** 2, -TILE / 2 + s * TILE] }), segs: 24 },
 };
-const PIECE_ORDER = ['road', 'start', 'cp', 'finish', 'boost', 'curve', 'bigcurve', 'slope', 'steep', 'jump', 'loopL', 'loopR', 'wallL', 'wallR', 'bank', 'bigloopL', 'bigloopR', 'tall', 'bump'];
+const PIECE_ORDER = ['road', 'start', 'cp', 'finish', 'boost', 'curve', 'bigcurve', 'slope', 'steep', 'jump', 'loopL', 'loopR', 'wallL', 'wallR', 'bank', 'bigloopL', 'bigloopR', 'tall', 'bump', 'scurveL', 'scurveR', 'cork', 'wave', 'bigjump', 'tunnel', 'climbL', 'climbR'];
 
 function rotXZ(x, z, r) { const a = r * Math.PI / 2, c = Math.cos(a), s = Math.sin(a); return [x * c + z * s, -x * s + z * c]; }
 function toWorld(l, pl) { const [x, z] = rotXZ(l[0], l[2], pl.r); return [x + pl.x * TILE, l[1] + pl.y * LVL, z + pl.z * TILE]; }
@@ -359,7 +373,7 @@ class TriGrid {
 // ---------- Strecke bauen ----------
 // Farbindizes: 0 Straße, 1 Randstein A, 2 Randstein B, 3 Seite, 4 Unterseite, 5 Boost, 6 Start/Ziel-Linie hell, 7 Linie dunkel
 function buildTrack(track) {
-  const phys = [], physPc = [], vis = [], visC = [], gates = [], pillars = [], guides = {};
+  const phys = [], physPc = [], vis = [], visC = [], gates = [], pillars = [], guides = {}, tunnels = [];
   let start = null, minY = 0, cpCount = 0;
   const bounds = { x0: 1e9, x1: -1e9, z0: 1e9, z1: -1e9 };
   const tri = (A, B, C, ci) => { vis.push(...A, ...B, ...C); visC.push(ci, ci, ci); };
@@ -420,13 +434,14 @@ function buildTrack(track) {
       if (def.gate === 'start' && !start) { const sp = pieceFrames(pl, 20)[14]; start = { p: sp.p, f: sp.f, u: sp.u }; }
     }
     if (def.guide) guides[idx] = pieceFrames(pl, 140);
+    if (def.tunnel) tunnels.push(mid);
     if (!def.guide) {
       for (const k of [0, 0.5, 1]) { const F = fr[Math.round(k * (fr.length - 1))]; if (F.u[1] > 0.8 && F.p[1] > 1.6) pillars.push({ p: vadds(F.p, F.u, -1.2), h: F.p[1] - 1.2 }); }
     }
   });
   return {
     grid: new TriGrid(new Float32Array(phys), Int32Array.from(physPc)),
-    vis: new Float32Array(vis), visC: Uint8Array.from(visC), gates, pillars, start, cpCount, minY, bounds, guides, pieces: track.pieces,
+    vis: new Float32Array(vis), visC: Uint8Array.from(visC), gates, pillars, tunnels, start, cpCount, minY, bounds, guides, pieces: track.pieces,
   };
 }
 
@@ -446,13 +461,17 @@ function probe(car, W, extra, u = car.u, need = 2) {
     if (h) { hits++; n = vadd(n, h.n); g = vadd(g, h.p); piece = h.piece; }
   }
   if (hits < need) {
-    if (car.p[1] < RIDE + 1.0 + extra && u[1] > 0.5) return { n: [0, 1, 0], g: [car.p[0], 0, car.p[2]], piece: -2 };
+    if (car.p[1] < RIDE + 1.0 + extra && u[1] > 0.5) {
+      const t = W.grid.raycast(vadd(car.p, [0, 1.5, 0]), [0, -1, 0], 4);
+      if (t && t.n[1] > 0.5) return { n: t.n, g: t.p, piece: t.piece };
+      return { n: [0, 1, 0], g: [car.p[0], 0, car.p[2]], piece: -2 };
+    }
     return null;
   }
   return { n: vnorm(n), g: vsc(g, 1 / hits), piece };
 }
 function land(car, n, piece) {
-  car.grounded = true; car.n = n; car.piece = piece; car.airT = 0;
+  car.grounded = true; car.n = n; car.piece = piece; car.airT = 0; car.convEma = 0;
   const vn = vdot(car.v, n); if (vn < 0) car.v = vadds(car.v, n, -vn);
   let f = vsub(car.f, vsc(n, vdot(car.f, n)));
   if (vlen(f) < 0.2) f = vsub(car.v, vsc(n, vdot(car.v, n)));
@@ -499,7 +518,6 @@ function stepCar(car, W, inp, dt) {
     }
     const vn = vdot(v, n);
     const speed = vlen(v);
-    if (def.launch && sp > 22 && f[1] < -0.06 && car.noLand <= 0) { car.grounded = false; car.noLand = 0.12; car.v = vadds(v, n, -vn + 1.5); car.f = f; car.p = vadds(car.p, car.v, dt); return; }
     if (vn > 7 || (n[1] < -0.2 && speed < 13) || (n[1] < 0.15 && speed < 11)) {
       car.grounded = false; car.noLand = 0.3; car.v = v; car.f = f; car.p = vadds(car.p, v, dt); return;
     }
@@ -508,6 +526,13 @@ function stepCar(car, W, inp, dt) {
     car.f = f;
     const h = probe(car, W, 1.0, n, 1);
     if (h) {
+      // Kuppen: biegt die Bahn schneller weg als die Schwerkraft das Auto runterzieht -> abheben
+      const conv = h.piece === -2 || W.guides[h.piece] || W.guides[car.piece] ? 0 : vdot(vsub(h.n, n), f) / dt;
+      car.convEma = (car.convEma || 0) + (conv - (car.convEma || 0)) * Math.min(1, 9 * dt);
+      const fwd = vdot(v, f);
+      if (fwd > 14 && n[1] > 0.3 && fwd * car.convEma > GRAV * n[1] * 1.1) {
+        car.grounded = false; car.noLand = 0.06; car.convEma = 0; car.v = v; car.f = f; car.airT = 0; return;
+      }
       v = rotBetween(n, h.n, v); f = rotBetween(n, h.n, f);
       const d = vdot(vsub(car.p, h.g), h.n); car.p = vadds(car.p, h.n, RIDE - d);
       car.n = h.n; car.u = h.n.slice(); car.piece = h.piece;
@@ -620,6 +645,16 @@ function turtle(spec) {
     else if (tok === 'TU') put('tall', 0, 4);
     else if (tok === 'TD') put('tall', 0, -4);
     else if (tok === 'H') put('bump', 0, 0);
+    else if (tok === 'SL') put('scurveL', 0, 0);
+    else if (tok === 'SR') put('scurveR', 0, 0);
+    else if (tok === 'X') put('cork', 0, 0);
+    else if (tok === 'V') put('wave', 0, 0);
+    else if ((m = tok.match(/^N(\d*)$/))) { for (let i = 0; i < (+m[1] || 1); i++) put('tunnel', 0, 0); }
+    else if (tok === 'LU') put('climbL', 1, 2);
+    else if (tok === 'RD') put('climbL', 3, -2);
+    else if (tok === 'RU') put('climbR', 3, 2);
+    else if (tok === 'LD') put('climbR', 1, -2);
+    else if ((m = tok.match(/^M(\d+)(?:-(\d+))?$/))) { put('bigjump', 0, 0); cx += DIRV[d][0] * +m[1]; cz += DIRV[d][1] * +m[1]; h -= +(m[2] || 0); }
     else if (tok === 'F') put('finish', 0, 0);
     else if ((m = tok.match(/^J(\d+)(?:-(\d+))?$/))) { put('jump', 0, 0); cx += DIRV[d][0] * +m[1]; cz += DIRV[d][1] * +m[1]; h -= +(m[2] || 0); }
     else throw new Error('Unbekannt: ' + tok);
@@ -651,10 +686,19 @@ const OFFICIAL = [
   { name: 'Achterbahn', env: 'summer', sun: 40, spec: 'B S TU S2 C S BL S TD S H S H B S OL S C KR S UU S J2-2 S3 F' },
   { name: 'Eiskanal', env: 'winter', sun: 22, spec: 'S KR S WL S C KL S WR S2 C B S GR S2 F' },
   { name: 'Canyon-Gipfel', env: 'desert', sun: 65, spec: 'B S TU S UU S C BR S WL S TD DD B S H S GL S C KL S2 F' },
+  // neu in 0.1.2
+  { name: 'Turbo-Tornado', env: 'summer', sun: 55, spec: 'B2 S X S C SL S OL S2 V S C BR B S GL S2 LU S UU S C M3-4 S3 BR S WL S C KR B S X S2 F' },
+  { name: 'Himmelsleiter', env: 'summer', sun: 35, spec: 'S2 LU S RU S LU S C UU S TU S C B S M4-4 S3 TD S C BL S V S OR S2 C SR S H S H S2 F' },
+  { name: 'Schneesturm', env: 'winter', sun: 18, spec: 'B S V S C KL S WR S X S C BR S2 GR S2 C SL S SR S N3 C B S J2 S3 F' },
+  { name: 'Gletscherspalte', env: 'winter', sun: 28, spec: 'S UU S UU S C RD S M3-2 S3 C BL S X S WL S C OL S2 F' },
+  { name: 'Polarexpress', env: 'winter', sun: 12, spec: 'B2 S N2 S C GL S KR S WL S C SL S V S C BR B S X S2 F' },
+  { name: 'Wüstenachterbahn', env: 'desert', sun: 70, spec: 'B S TU S C RD S RD S C V S H H S GL S C SR SL S M3 S3 C KL S2 F' },
+  { name: 'Pyramidensprung', env: 'desert', sun: 62, spec: 'S2 UU S UU S UU S C M4-6 S3 C BR S X S OR S2 C WL S B S J2 S3 F' },
+  { name: 'Todesspirale', env: 'desert', sun: 78, spec: 'B S LU S2 RU S C X S GR S2 C TU B2 M3-4 S3 C BL S WR S V S KL B S OL S C SL SR S H H S2 F' },
 ];
 function officialTrack(i) { const o = OFFICIAL[i]; const { pieces, order } = turtle(o.spec); return { name: o.name, env: o.env, sun: o.sun, pieces, order, official: i }; }
 
-const AUTHOR = [8.435, 12.395, 15.483, 9.964, 15.33, 15.688, 20.496, 10.642, 10.283, 11.118, 12.374, 8.579, 13.64, 14.198, 17.251, 14.188, 17.806, 15.587, 16.378];
+const AUTHOR = [8.435, 12.501, 15.939, 9.964, 15.33, 15.671, 20.901, 10.642, 10.308, 11.497, 12.374, 8.811, 13.64, 14.485, 17.526, 14.333, 19.044, 15.838, 17.254, 31.776, 28.308, 24.195, 19.696, 18.745, 25.147, 24.946, 32.369];
 OFFICIAL.forEach((o, i) => o.author = AUTHOR[i]);
 
 /* ================= Poly Rush 3D – Spiel (Grafik, UI, Editor) ================= */
@@ -675,7 +719,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in win
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- Einstellungen ----------
-const VERSION = '0.1.1';
+const VERSION = '0.1.2';
 const DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], drift: ['Space', 'ShiftLeft'], restart: ['KeyR', 'Enter'], checkpoint: ['Backspace'], camera: ['KeyC'], pause: ['Escape'] };
 const KEY_NAMES = { up: 'Gas', down: 'Bremse / Rückwärts', left: 'Links', right: 'Rechts', drift: 'Driften', restart: 'Neustart', checkpoint: 'Zum Checkpoint', camera: 'Kamera wechseln', pause: 'Pause' };
 const settings = Object.assign({ name: 'Spieler', ghosts: 3, shadows: true, sound: true, quality: 'hoch', cam: 0 }, store.get('settings', {}));
@@ -755,6 +799,15 @@ function buildTrackMesh(W, envName, opts = {}) {
     const tex = gateTex(g.type);
     const ban = new THREE.Mesh(new THREE.BoxGeometry(2 * HALF_W + 2, 1.6, 0.5), [lambert(0x333a48), lambert(0x333a48), lambert(0x333a48), lambert(0x333a48), new THREE.MeshBasicMaterial({ map: tex }), new THREE.MeshBasicMaterial({ map: tex })]);
     ban.position.set(0, 6.1, 0); ban.castShadow = true; gr.add(ban);
+    grp.add(gr);
+  }
+  const tunMat = lambert(E.side, { side: THREE.DoubleSide, flatShading: true }), ribMat = lambert(E.curbA, { side: THREE.DoubleSide });
+  const tunGeo = new THREE.CylinderGeometry(HALF_W + 1.6, HALF_W + 1.6, TILE, 12, 1, true, Math.PI / 2, Math.PI).rotateX(Math.PI / 2);
+  const ribGeo = new THREE.CylinderGeometry(HALF_W + 1.7, HALF_W + 1.7, 0.8, 12, 1, true, Math.PI / 2, Math.PI).rotateX(Math.PI / 2);
+  for (const t of W.tunnels || []) {
+    const gr = new THREE.Group(); gr.position.set(...t.p); gr.quaternion.copy(basisQuat(t.f, t.u));
+    const m = new THREE.Mesh(tunGeo, tunMat); m.castShadow = m.receiveShadow = true; gr.add(m);
+    for (const z of [-TILE / 2 + 0.4, TILE / 2 - 0.4]) { const r = new THREE.Mesh(ribGeo, ribMat); r.position.z = z; gr.add(r); }
     grp.add(gr);
   }
   const pilMat = lambert(E.side), pilGeo = new THREE.CylinderGeometry(0.8, 1, 1, 6);
@@ -1128,7 +1181,9 @@ function updateRace(dt) {
   // Darstellung
   const a = G.phase === 'run' ? Math.min(1, G.acc / DT) : 1;
   G.car.position.lerpVectors(G.prevP, new THREE.Vector3(...car.p), a);
-  G.car.quaternion.slerpQuaternions(G.prevQ, G.curQ, a);
+  if (!G.visQ || camState.snap || G.phase !== 'run') { G.visQ = new THREE.Quaternion().slerpQuaternions(G.prevQ, G.curQ, a); }
+  else { const tq = new THREE.Quaternion().slerpQuaternions(G.prevQ, G.curQ, a); G.visQ.slerp(tq, 1 - Math.exp(-(car.grounded ? 18 : 10) * dt)); }
+  G.car.quaternion.copy(G.visQ);
   const sp = vdot(car.v, car.f);
   animateWheels(G.car, car.steer, sp, paused ? 0 : dt);
   const tGhost = G.phase === 'run' ? R.t : 0;

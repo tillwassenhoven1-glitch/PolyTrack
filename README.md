@@ -6,9 +6,18 @@ Ein Low-Poly-Rennspiel im Browser: Rase über Strecken mit Loopings, Wandfahrten
 
 👉 https://tillwassenhoven1-glitch.github.io/PolyTrack/
 
-Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.1 · Open Beta**
+Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.2 · Open Beta**
 
-## 🆕 Neu in Version 0.1.1
+## 🆕 Neu in Version 0.1.2
+
+- 🛫 **Abheben an Kuppen** – über Rampen und Hügel fliegt das Auto jetzt ein Stück, statt ruckelig an der Bahn zu kleben
+- 🧈 Flüssigeres Fahrgefühl: feinere Rampen und weichere Landungen
+- 🌪️ **Korkenzieher** – einmal komplett um die eigene Achse
+- 〽️ **S-Kurven**, 🌊 **Wellen**, 🚀 **Mega-Schanzen**, 🚇 **Tunnel** und 🌀 **Spiral-Rampen** (Kurve + 2 Ebenen hoch)
+- 🏁 **8 neue, lange Strecken** voller Action: Turbo-Tornado, Himmelsleiter, Schneesturm, Gletscherspalte, Polarexpress, Wüstenachterbahn, Pyramidensprung und Todesspirale
+- 🛠️ Editor jetzt mit **27 Bauteilen**
+
+## Neu in Version 0.1.1
 
 - 🔥 **Driften!** Mit der Leertaste (oder der DRIFT-Taste am Handy) rutschst du quer um die Kurven – mit Reifenrauch und Sound
 - 🧱 **Wandfahrten** – die Straße kippt zur Seite und du fährst an der Wand entlang
@@ -29,11 +38,11 @@ Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy
 
 ## Strecken
 
-- 🌍 **19 offizielle Strecken** in drei Welten:
-  - ☀️ **Sommer** – 9 Strecken
-  - ❄️ **Winter** – 5 Strecken
-  - 🏜️ **Wüste** – 5 Strecken
-- 🔄 Loopings, 🎡 Riesen-Loopings, 🧱 Wandfahrten, 🌀 Steilkurven, 🛫 Schanzen, 🗻 hohe Rampen, 〰️ Buckel, ⚡ Booster und große & enge Kurven
+- 🌍 **27 offizielle Strecken** in drei Welten:
+  - ☀️ **Sommer** – 11 Strecken
+  - ❄️ **Winter** – 8 Strecken
+  - 🏜️ **Wüste** – 8 Strecken
+- 🔄 Loopings, 🎡 Riesen-Loopings, 🧱 Wandfahrten, 🌀 Steilkurven, 🛫 Schanzen, 🗻 hohe Rampen, 🌪️ Korkenzieher, 〽️ S-Kurven, 🌊 Wellen, 🚀 Mega-Schanzen, 🚇 Tunnel, 🌀 Spiral-Rampen, 〰️ Buckel, ⚡ Booster und große & enge Kurven
 - 🏅 Medaillen auf jeder offiziellen Strecke: 💎 Autor, 🥇 Gold, 🥈 Silber, 🥉 Bronze
 
 ## Features
@@ -42,7 +51,7 @@ Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy
 - 👁️ Wiederholungen: Schau dir deine besten Läufe nochmal an
 - 🏆 Bestenliste (Top 10) für jede Strecke, mit Spielername und Datum
 - 🔥 Driften mit Reifenrauch
-- 🛠️ **Strecken-Editor** mit 19 Bauteilen – bauen, testen, speichern
+- 🛠️ **Strecken-Editor** mit 27 Bauteilen – bauen, testen, speichern
 - 📤 Strecken als Code **exportieren** und mit Freunden **teilen** – 📥 importieren mit einem Klick
 - 🎨 **Garage**: Lackfarbe, Zweitfarbe, 5 Lackmuster und 4 Felgen-Designs
 - 🎥 3 Kamera-Perspektiven (Verfolger, Weit, Motorhaube)
