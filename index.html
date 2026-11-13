@@ -112,7 +112,7 @@ label{font-size:14px}
     <button class="btn" data-go="garage">🎨 Garage</button>
     <button class="btn" data-go="settings">⚙️ Einstellungen</button>
   </div>
-  <div class="ver">Version 0.1.3 · Open Beta</div>
+  <div class="ver">Version 0.1.4 · Open Beta</div>
 </div></div>
 
 <!-- Streckenwahl -->
@@ -210,7 +210,7 @@ label{font-size:14px}
 </div></div>
 
 <div id="toast" style="opacity:0"></div>
-<div id="ver">Poly Rush 3D · v0.1.3 Open Beta</div>
+<div id="ver">Poly Rush 3D · v0.1.4 Open Beta</div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -670,46 +670,46 @@ function turtle(spec) {
 
 const OFFICIAL = [
   // Sommer
-  { name: 'Erster Gang', env: 'summer', sun: 40, spec: 'S2 BR S2 C S2 BL S B2 S2 F' },
-  { name: 'Grüne Welle', env: 'summer', sun: 55, spec: 'S U S D S BL S C U U S D D S BR B S J2 S2 F' },
-  { name: 'Hügelsprint', env: 'summer', sun: 30, spec: 'B S UU S2 C S DD B S BR S UU S J2-2 S3 C S L S R S2 F' },
-  { name: 'Looping-Lagune', env: 'summer', sun: 65, spec: 'B2 S OL S2 C BR S2 B S OR S2 F' },
-  { name: 'Wiesenwirbel', env: 'summer', sun: 45, spec: 'S2 R S L S2 C S BR BR S2 C B S L S R S B S2 F' },
-  { name: 'Sprungschanze', env: 'summer', sun: 50, spec: 'B2 S J3 S2 C U S J2-1 S3 BL S B2 J3 S3 C S BR S2 F' },
-  { name: 'Sommer-Finale', env: 'summer', sun: 35, spec: 'B S2 U S BL S C S D B S OL S2 C BR B S J3 S3 UU S BR S DD C B S OR S2 F' },
+  { name: 'Erster Gang', env: 'summer', sun: 40, spec: 'U D BR HG C V BL H B2 S2 F' },
+  { name: 'Grüne Welle', env: 'summer', sun: 55, spec: 'H U H D H BL H C U U H D D H BR B S J2 S2 F' },
+  { name: 'Hügelsprint', env: 'summer', sun: 30, spec: 'B H UU UU DD C H DD B H BR H UU S J2-2 S3 C H L H R S2 F' },
+  { name: 'Looping-Lagune', env: 'summer', sun: 65, spec: 'B2 H OL HR C BR U D B H OR S2 F' },
+  { name: 'Wiesenwirbel', env: 'summer', sun: 45, spec: 'HR R H L HG C H BR BR UU DD C B H L H R H B S2 F' },
+  { name: 'Sprungschanze', env: 'summer', sun: 50, spec: 'B2 S J3 S2 C U S J2-1 S3 BL H B2 J3 S3 C H BR S2 F' },
+  { name: 'Sommer-Finale', env: 'summer', sun: 35, spec: 'B HG U H BL H C H D B H OL HG C BR B S J3 S3 UU S BR H DD C B H OR S2 F' },
   // Winter
-  { name: 'Frostkurve', env: 'winter', sun: 25, spec: 'S2 BL S C S R S2 L S BR S2 F' },
-  { name: 'Eisbahn', env: 'winter', sun: 20, spec: 'B S2 BR S U S2 C S D S BL B J2 S2 F' },
-  { name: 'Gipfelsturm', env: 'winter', sun: 30, spec: 'S UU S UU S C BR S2 DD S DD C B S BL S2 F' },
-  { name: 'Polarloop', env: 'winter', sun: 15, spec: 'B2 S OR S2 C BL S2 B S OL S C S BR S2 F' },
+  { name: 'Frostkurve', env: 'winter', sun: 25, spec: 'V BL H C H R U D L H BR S2 F' },
+  { name: 'Eisbahn', env: 'winter', sun: 20, spec: 'B HR BR H U U D C H D H BL B J2 S2 F' },
+  { name: 'Gipfelsturm', env: 'winter', sun: 30, spec: 'H UU H UU H C BR V DD H DD C B H BL S2 F' },
+  { name: 'Polarloop', env: 'winter', sun: 15, spec: 'B2 H OR V C BL V B H OL H C H BR S2 F' },
   // Wüste
-  { name: 'Dünenritt', env: 'desert', sun: 70, spec: 'S U D S U D C S BR S U D S2 F' },
-  { name: 'Kaktus-Canyon', env: 'desert', sun: 60, spec: 'S2 L S R S C S2 BR S L S R C S2 B S2 F' },
-  { name: 'Oasen-Sprint', env: 'desert', sun: 75, spec: 'B2 S J3 S3 C S BL S2 B S UU S J2-2 S3 C BR S2 F' },
-  { name: 'Sandsturm', env: 'desert', sun: 80, spec: 'B S OL S C S BR S2 UU S DD S C BL B S OR S2 C B S J3 S3 F' },
+  { name: 'Dünenritt', env: 'desert', sun: 70, spec: 'H U D H U D C H BR H U D S2 F' },
+  { name: 'Kaktus-Canyon', env: 'desert', sun: 60, spec: 'V L H R H C U D BR H L H R C UU DD B S2 F' },
+  { name: 'Oasen-Sprint', env: 'desert', sun: 75, spec: 'B2 S J3 S3 C H BL HR B H UU S J2-2 S3 C BR S2 F' },
+  { name: 'Sandsturm', env: 'desert', sun: 80, spec: 'B H OL H C H BR V UU H DD H C BL B H OR V C B S J3 S3 F' },
   // neu in 0.1.1
-  { name: 'Wandläufer', env: 'summer', sun: 50, spec: 'B S WL S C BR S2 WR S KL S C B S GL S2 F' },
-  { name: 'Achterbahn', env: 'summer', sun: 40, spec: 'B S TU S2 C S BL S TD S H S H B S OL S C KR S UU S J2-2 S3 F' },
-  { name: 'Eiskanal', env: 'winter', sun: 22, spec: 'S KR S WL S C KL S WR S2 C B S GR S2 F' },
-  { name: 'Canyon-Gipfel', env: 'desert', sun: 65, spec: 'B S TU S UU S C BR S WL S TD DD B S H S GL S C KL S2 F' },
+  { name: 'Wandläufer', env: 'summer', sun: 50, spec: 'B H WL H C BR V WR H KL H C B H GL S2 F' },
+  { name: 'Achterbahn', env: 'summer', sun: 40, spec: 'B H TU V C H BL H TD H H H H B H OL H C KR H UU S J2-2 S3 F' },
+  { name: 'Eiskanal', env: 'winter', sun: 22, spec: 'H KR H WL H C KL H WR HG C B H GR S2 F' },
+  { name: 'Canyon-Gipfel', env: 'desert', sun: 65, spec: 'B H TU H UU H C BR H WL H TD DD B H H H GL H C KL S2 F' },
   // neu in 0.1.2
-  { name: 'Turbo-Tornado', env: 'summer', sun: 55, spec: 'B2 S X S C SL S OL S2 V S C BR B S GL S2 LU S UU S C M3-4 S3 BR S WL S C KR B S X S2 F' },
-  { name: 'Himmelsleiter', env: 'summer', sun: 35, spec: 'S2 LU S RU S LU S C UU S TU S C B S M4-4 S3 TD S C BL S V S OR S2 C SR S H S H S2 F' },
-  { name: 'Schneesturm', env: 'winter', sun: 18, spec: 'B S V S C KL S WR S X S C BR S2 GR S2 C SL S SR S N3 C B S J2 S3 F' },
-  { name: 'Gletscherspalte', env: 'winter', sun: 28, spec: 'S UU S UU S C RD S M3-2 S3 C BL S X S WL S C OL S2 F' },
-  { name: 'Polarexpress', env: 'winter', sun: 12, spec: 'B2 S N2 S C GL S KR S WL S C SL S V S C BR B S X S2 F' },
-  { name: 'Wüstenachterbahn', env: 'desert', sun: 70, spec: 'B S TU S C RD S RD S C V S H H S GL S C SR SL S M3 S3 C KL S2 F' },
-  { name: 'Pyramidensprung', env: 'desert', sun: 62, spec: 'S2 UU S UU S UU S C M4-6 S3 C BR S X S OR S2 C WL S B S J2 S3 F' },
-  { name: 'Todesspirale', env: 'desert', sun: 78, spec: 'B S LU S2 RU S C X S GR S2 C TU B2 M3-4 S3 C BL S WR S V S KL B S OL S C SL SR S H H S2 F' },
+  { name: 'Turbo-Tornado', env: 'summer', sun: 55, spec: 'B2 H X H C SL H OL V V H C BR B H GL U D LU H UU H C M3-4 S3 BR H WL H C KR B H X S2 F' },
+  { name: 'Himmelsleiter', env: 'summer', sun: 35, spec: 'U D LU H RU H LU H C UU H TU H C B S M4-4 S3 TD H C BL H V H OR HR C SR H H H H S2 F' },
+  { name: 'Schneesturm', env: 'winter', sun: 18, spec: 'B H V H C KL H WR H X H C BR HG GR V C SL H SR H N3 C B S J2 S3 F' },
+  { name: 'Gletscherspalte', env: 'winter', sun: 28, spec: 'H UU H UU H C RD S M3-2 S3 C BL H X H WL H C OL S2 F' },
+  { name: 'Polarexpress', env: 'winter', sun: 12, spec: 'B2 H N2 H C GL S KR H WL H C SL H V H C BR B H X S2 F' },
+  { name: 'Wüstenachterbahn', env: 'desert', sun: 70, spec: 'B H TU H C RD S RD H C V H H H H GL H C SR SL S M3 S3 C KL S2 F' },
+  { name: 'Pyramidensprung', env: 'desert', sun: 62, spec: 'U D UU H UU H UU H C M4-6 S3 C BR H X H OR HG C WL H B S J2 S3 F' },
+  { name: 'Todesspirale', env: 'desert', sun: 78, spec: 'B H LU V RU H C X H GR U D C TU B2 M3-4 S3 C BL S WR H V H KL B H OL H C SL SR H H H S2 F' },
   // neu in 0.1.3
-  { name: 'Hügelhüpfer', env: 'summer', sun: 48, spec: 'B S HG S H S HG C S V S BR B S HC S H H S C HR S HG S BL S V S2 F' },
-  { name: 'Buckelpiste', env: 'winter', sun: 20, spec: 'S HR S H S C HG S HC S KR B S V V S C HG S H S2 F' },
-  { name: 'Dünenmeer', env: 'desert', sun: 72, spec: 'B S HC S HG S C HG S V S BL S HR S HC C B S H H H S2 F' },
-  { name: 'Holper-Express', env: 'summer', sun: 58, spec: 'B2 S HG HG S C OL S HC S BR S V S HR C S X S HG S2 F' },
+  { name: 'Hügelhüpfer', env: 'summer', sun: 48, spec: 'B H HG H H H HG C H V H BR B H HC H H H H C HR H HG H BL H V S2 F' },
+  { name: 'Buckelpiste', env: 'winter', sun: 20, spec: 'H HR H H H C HG H HC H KR B H V V H C HG H H S2 F' },
+  { name: 'Dünenmeer', env: 'desert', sun: 72, spec: 'B H HC H HG H C HG H V H BL H HR H HC C B H H H H S2 F' },
+  { name: 'Holper-Express', env: 'summer', sun: 58, spec: 'B2 H HG HG H C OL H HC H BR H V H HR C H X H HG S2 F' },
 ];
 function officialTrack(i) { const o = OFFICIAL[i]; const { pieces, order } = turtle(o.spec); return { name: o.name, env: o.env, sun: o.sun, pieces, order, official: i }; }
 
-const AUTHOR = [8.435, 12.501, 15.939, 9.964, 15.33, 15.671, 20.901, 10.642, 10.308, 11.497, 12.374, 8.811, 13.64, 14.485, 17.526, 14.333, 19.044, 15.838, 17.254, 31.776, 28.308, 24.195, 19.696, 18.745, 25.147, 24.946, 32.369, 19.65, 17.07, 16.701, 17.549];
+const AUTHOR = [9.337, 13.312, 17.881, 10.299, 16.694, 16.028, 21.775, 10.968, 11.157, 13.297, 13.323, 9.348, 14.985, 15.176, 18.58, 15.812, 21.17, 16.773, 18.437, 34.105, 31.105, 25.683, 20.922, 19.87, 26.012, 26.826, 33.972, 21.853, 18.77, 18.886, 19.788];
 OFFICIAL.forEach((o, i) => o.author = AUTHOR[i]);
 
 /* ================= Poly Rush 3D – Spiel (Grafik, UI, Editor) ================= */
@@ -730,7 +730,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in win
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- Einstellungen ----------
-const VERSION = '0.1.3';
+const VERSION = '0.1.4';
 const DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], drift: ['Space', 'ShiftLeft'], restart: ['KeyR', 'Enter'], checkpoint: ['Backspace'], camera: ['KeyC'], pause: ['Escape'] };
 const KEY_NAMES = { up: 'Gas', down: 'Bremse / Rückwärts', left: 'Links', right: 'Rechts', drift: 'Driften', restart: 'Neustart', checkpoint: 'Zum Checkpoint', camera: 'Kamera wechseln', pause: 'Pause' };
 const settings = Object.assign({ name: 'Spieler', ghosts: 3, shadows: true, sound: true, quality: 'hoch', cam: 0 }, store.get('settings', {}));
@@ -1031,7 +1031,7 @@ function medalFor(track, time) {
   for (const [ic, nm, f] of MEDALS) if (time <= Math.ceil(a * f * 1000) / 1000) return { ic, nm };
   return null;
 }
-const trackKey = tr => tr.official != null ? 'o' + tr.official : 'c' + hashStr(JSON.stringify(tr.pieces));
+const trackKey = tr => tr.official != null ? 'o' + tr.official + '_' + hashStr(OFFICIAL[tr.official].spec) : 'c' + hashStr(JSON.stringify(tr.pieces));
 function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
 const getRuns = tr => store.get('runs_' + trackKey(tr), []);
 function saveRun(tr, run) {
