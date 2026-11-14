@@ -6,9 +6,22 @@ Ein Low-Poly-Rennspiel im Browser: Rase über Strecken mit Loopings, Wandfahrten
 
 👉 https://tillwassenhoven1-glitch.github.io/PolyTrack/
 
-Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.1.6 · Open Beta**
+Keine Installation, kein Konto, keine Werbung, keine Käufe – läuft auf Handy, iPad und PC. 🎮 **Version 0.2.0 · Open Beta**
 
-## 🆕 Neu in Version 0.1.6
+## 🆕 Neu in Version 0.2.0 – Online-Rennen! 🌐
+
+- 🏁 **Online gegeneinander fahren** – bis zu **8 Spieler** gleichzeitig
+- 👻 Kein Zusammenstoßen: Ihr fahrt einfach **durcheinander durch** (wie Geister), jeder sieht die Autos der anderen mit Namen darüber
+- ➕ **Raum erstellen** → du bekommst einen **5-stelligen Code** (oder einen Einladungslink zum Kopieren)
+- 🔑 Freunde gehen auf **🌐 Online-Rennen → Code eingeben → Beitreten**
+- 🗺️ **Lobby mit Menü**: Der Host wählt die Strecke (alle offiziellen + eigene Strecken oder 🎲 Zufall) und startet das Rennen
+- 🚦 Alle starten gleichzeitig nebeneinander in einer Startaufstellung
+- 🏆 **Live-Ergebnisliste** mit Platzierungen und Abstand zum Ersten
+- 🔁 Danach: zurück in die Lobby oder sofort nochmal starten
+- 🎨 Jeder fährt mit seinem eigenen Auto aus der Garage
+- 🔧 Kein Konto, kein Server nötig – die Verbindung läuft direkt zwischen den Geräten
+
+## Neu in Version 0.1.6
 
 - 🏎️ **Realistischeres Auto**: Sportwagen-Form mit Radkästen, schräger Frontscheibe, Spiegeln, Scheinwerfern, Auspuff, Frontsplitter und Heckflügel
 - 🔢 **Startnummer**: Eigene Zahl (0–99) in der Garage eintippen oder würfeln – sitzt passend auf Türen und Motorhaube
@@ -123,8 +136,8 @@ Im Editor kannst du außerdem die Welt (Sommer, Winter, Wüste) und den Sonnenst
 
 ## Hinweise zur Beta
 
-- 🏆 Die Bestenliste ist **lokal** (pro Gerät) – eine weltweite Bestenliste gibt es noch nicht
-- 🌐 Multiplayer ist noch nicht dabei
+- 🏆 Die Bestenliste ist **lokal** (pro Gerät) – eine weltweite Bestenliste gibt es noch nicht; Online-Rennen zählen nicht für die Bestenliste
+- 🌐 Online-Rennen laufen direkt zwischen den Geräten (über PeerJS). In manchen Schul- oder Firmennetzwerken kann die Verbindung blockiert sein – dann hilft meistens ein anderes WLAN oder mobile Daten
 - 🐞 Fehler gefunden? Erstelle gerne ein Issue!
 
 ---

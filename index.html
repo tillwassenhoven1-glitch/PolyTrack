@@ -108,11 +108,12 @@ label{font-size:14px}
   <div class="sub">Low-Poly-Rennen gegen die Uhr – auf die Millisekunde genau ⏱️</div>
   <div class="menuBtns">
     <button class="btn main" data-go="tracks">🏁 Spielen</button>
+    <button class="btn go" data-go="online">🌐 Online-Rennen</button>
     <button class="btn" data-go="editor">🛠️ Strecken-Editor</button>
     <button class="btn" data-go="garage">🎨 Garage</button>
     <button class="btn" data-go="settings">⚙️ Einstellungen</button>
   </div>
-  <div class="ver">Version 0.1.6 · Open Beta</div>
+  <div class="ver">Version 0.2.0 · Open Beta</div>
 </div></div>
 
 <!-- Streckenwahl -->
@@ -209,8 +210,25 @@ label{font-size:14px}
   <div id="settingsBody"></div>
 </div></div>
 
+<div id="online" class="screen hidden"><div class="panel" style="width:min(460px,94vw);text-align:center">
+  <div class="top"><h2 style="margin:0">🌐 Online-Rennen</h2><button class="btn small" id="onBack">⬅️ Zurück</button></div>
+  <div class="sub">Fahrt gleichzeitig gegeneinander – ohne Zusammenstöße, ihr fahrt durcheinander durch.</div>
+  <div class="row" style="justify-content:center"><label>👤 Dein Name</label><input type="text" id="onName" maxlength="16"></div>
+  <div class="menuBtns" style="margin-top:16px"><button class="btn main" id="onCreate">➕ Raum erstellen</button></div>
+  <div class="sub" style="margin:18px 0 8px">oder mit Code beitreten</div>
+  <div class="row" style="justify-content:center"><input type="text" id="onCode" maxlength="5" placeholder="CODE" autocomplete="off" style="width:130px;text-transform:uppercase;font-weight:800;letter-spacing:4px;text-align:center"><button class="btn go" id="onJoin">Beitreten</button></div>
+  <div class="sub" id="onStatus" style="margin-top:14px"></div>
+</div></div>
+<div id="lobby" class="screen hidden"><div class="panel" style="width:min(560px,94vw)">
+  <div class="top"><h2 style="margin:0">🏁 Raum <span id="lbCode" style="letter-spacing:3px;color:#ffd23f"></span></h2><button class="btn small" id="lbLeave">🚪 Verlassen</button></div>
+  <div class="row"><button class="btn small" id="lbCopy">📋 Code kopieren</button><button class="btn small" id="lbLink">🔗 Einladungslink kopieren</button></div>
+  <h3 style="margin:16px 0 8px">🗺️ Strecke</h3><div id="lbTrack"></div>
+  <h3 style="margin:16px 0 8px">👥 Spieler (<span id="lbCount"></span>/8)</h3><div id="lbPlayers"></div>
+  <div class="row" style="justify-content:center;margin-top:16px"><button class="btn main" id="lbStart">🚦 Rennen starten</button></div>
+  <div class="sub" id="lbInfo" style="text-align:center"></div>
+</div></div>
 <div id="toast" style="opacity:0"></div>
-<div id="ver">Poly Rush 3D · v0.1.6 Open Beta</div>
+<div id="ver">Poly Rush 3D · v0.2.0 Open Beta</div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -763,7 +781,7 @@ const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in win
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- Einstellungen ----------
-const VERSION = '0.1.6';
+const VERSION = '0.2.0';
 const DEFAULT_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], drift: ['Space', 'ShiftLeft'], restart: ['KeyR', 'Enter'], checkpoint: ['Backspace'], camera: ['KeyC'], pause: ['Escape'] };
 const KEY_NAMES = { up: 'Gas', down: 'Bremse / Rückwärts', left: 'Links', right: 'Rechts', drift: 'Driften', restart: 'Neustart', checkpoint: 'Zum Checkpoint', camera: 'Kamera wechseln', pause: 'Pause' };
 const settings = Object.assign({ name: 'Spieler', ghosts: 3, shadows: true, sound: true, quality: 'hoch', cam: 0 }, store.get('settings', {}));
@@ -1068,11 +1086,11 @@ addEventListener('keydown', e => {
     if (settings.keys.pause.includes(e.code)) togglePause();
     else if (paused) return;
     else if (settings.keys.camera.includes(e.code)) cycleCam();
-    else if (mode === 'race' && settings.keys.restart.includes(e.code)) restartRace();
+    else if (mode === 'race' && settings.keys.restart.includes(e.code)) { if (G && G.online) toCheckpoint(); else restartRace(); }
     else if (mode === 'race' && settings.keys.checkpoint.includes(e.code)) toCheckpoint();
   } else if (mode === 'finish') {
     if (e.repeat) return;
-    if (settings.keys.restart.includes(e.code)) { e.preventDefault(); restartRace(); }
+    if (settings.keys.restart.includes(e.code) && !(G && G.online)) { e.preventDefault(); restartRace(); }
     else if (e.code === 'Escape') leaveRace();
   } else if (mode === 'editor') edKey(e);
 });
@@ -1088,14 +1106,14 @@ bindTouch('#tLeft', 'left'); bindTouch('#tRight', 'right'); bindTouch('#tGas', '
 
 // ---------- Bildschirme ----------
 let mode = 'menu', paused = false;
-const SCREENS = ['menu', 'tracks', 'finish', 'pause', 'garage', 'settings', 'codeBox'];
+const SCREENS = ['menu', 'tracks', 'finish', 'pause', 'garage', 'settings', 'codeBox', 'online', 'lobby'];
 function show(name) {
   for (const s of SCREENS) $('#' + s).classList.toggle('hidden', s !== name);
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-go]'); if (!b) return;
   const g = b.dataset.go;
-  if (g === 'menu') goMenu(); else if (g === 'tracks') openTracks(); else if (g === 'editor') openEditor(); else if (g === 'garage') openGarage(); else if (g === 'settings') openSettings();
+  if (g === 'menu') goMenu(); else if (g === 'tracks') openTracks(); else if (g === 'editor') openEditor(); else if (g === 'garage') openGarage(); else if (g === 'settings') openSettings(); else if (g === 'online') openOnline();
 });
 function setHud(on) { $('#hud').classList.toggle('hidden', !on); $('#topBtns').classList.toggle('hidden', !on); $('#touch').classList.toggle('hidden', !(on && isTouch && mode === 'race')); }
 
@@ -1175,7 +1193,7 @@ function startRace(track, opts = {}) {
   loadScene(track, W, true);
   const R = createRace(W);
   const car = makeCar(carCfg, false); scene.add(car);
-  G = { track, W, R, car, ghosts: [], rec: [], acc: 0, phase: 'countdown', cd: 0, test: !!opts.test, steps: 0, prevP: new THREE.Vector3(), prevQ: new THREE.Quaternion(), curQ: new THREE.Quaternion(), splitT: 0, bestSplits: null, finT: 0, msgT: 0 };
+  G = { track, W, R, car, ghosts: [], rec: [], acc: 0, phase: 'countdown', cd: 0, test: !!opts.test, online: !!opts.online, steps: 0, prevP: new THREE.Vector3(), prevQ: new THREE.Quaternion(), curQ: new THREE.Quaternion(), splitT: 0, bestSplits: null, finT: 0, msgT: 0 };
   setupGhosts();
   mode = 'race'; paused = false; show(null); setHud(true);
   $('#bCp').classList.remove('hidden'); $('#bRestart').classList.remove('hidden');
@@ -1186,7 +1204,7 @@ function startRace(track, opts = {}) {
 function setupGhosts() {
   for (const gh of G.ghosts) scene.remove(gh.mesh);
   G.ghosts = [];
-  const runs = G.test ? [] : getRuns(G.track);
+  const runs = G.test || G.online ? [] : getRuns(G.track);
   G.bestSplits = runs[0] ? runs[0].s : null; G.best = runs[0] ? runs[0].t : null;
   const cols = ['#ffd23f', '#5ab0ff', '#ff5aa8', '#7cff5a', '#c07cff', '#ff8a3d', '#5affe0', '#ffffff', '#ff5a5a', '#a0a0ff'];
   runs.filter(r => r.g).slice(0, settings.ghosts).forEach((r, i) => {
@@ -1228,7 +1246,13 @@ function updateSmoke(dt) {
 function restartRace() {
   if (!G) return;
   if (mode === 'finish') { mode = 'race'; show(null); setHud(true); }
-  resetRace(G.R, G.W); G.phase = 'countdown'; G.cd = 1.5; G.acc = 0; G.rec = []; G.steps = 0; G.lastCd = 4;
+  resetRace(G.R, G.W);
+  if (G.online && NET.state) { // Startaufstellung: 4 Spuren x 2 Reihen
+    const slot = Math.max(0, NET.state.players.findIndex(p => p.id === NET.myId)), c = G.R.car, r = vnorm(vcross(c.f, c.u));
+    const lane = [-3.6, 3.6, -1.2, 1.2][slot % 4], row = Math.floor(slot / 4) * 5;
+    c.p = vadds(vadds(c.p, r, lane), c.f, -row); G.R.respawn = { ...G.R.respawn, p: vadds(vadds(G.R.respawn.p, r, lane), c.f, -row) };
+  }
+  G.phase = 'countdown'; G.cd = 1.5; G.acc = 0; G.rec = []; G.steps = 0; G.lastCd = 4;
   G.prevP.set(...G.R.car.p); basisQuat(G.R.car.f, G.R.car.u, G.prevQ); G.curQ.copy(G.prevQ);
   camState.snap = true; $('#split').classList.add('hidden'); $('#msg').textContent = '';
   setupGhosts();
@@ -1241,6 +1265,7 @@ function togglePause() {
     const b = $('#pauseBtns'); b.innerHTML = '';
     const mk = (t, fn, cls = '') => { const x = el('button', 'btn ' + cls, t); x.onclick = fn; b.appendChild(x); };
     mk('▶️ Weiter', togglePause, 'main');
+    if (G && G.online) { mk('🚪 Raum verlassen', () => { paused = false; NET.leave(); goMenu(); }); return engineSound(0, false, 0); }
     if (mode === 'race') mk('🔄 Neustart', () => { togglePause(); restartRace(); });
     mk(G && G.test ? '🛠️ Zurück zum Editor' : '🏁 Streckenwahl', () => { paused = false; leaveRace(); });
     mk('🏠 Hauptmenü', () => { paused = false; goMenu(); });
@@ -1248,7 +1273,7 @@ function togglePause() {
   engineSound(0, false, 0);
 }
 function leaveRace() { const test = G && G.test; endRace(); if (test) openEditor(true); else openTracks(); }
-function endRace() { if (G) { scene.remove(G.car); for (const gh of G.ghosts) scene.remove(gh.mesh); if (G.smoke) for (const p of G.smoke) scene.remove(p.sp); } driftSound(false); G = null; setHud(false); engineSound(0, false, 0); paused = false; }
+function endRace() { NET.clearRemotes(); if (G) { scene.remove(G.car); for (const gh of G.ghosts) scene.remove(gh.mesh); if (G.smoke) for (const p of G.smoke) scene.remove(p.sp); } driftSound(false); G = null; setHud(false); engineSound(0, false, 0); paused = false; }
 
 function updateRace(dt) {
   const R = G.R, car = R.car;
@@ -1297,6 +1322,7 @@ function updateRace(dt) {
   if (G.splitT > 0) { G.splitT -= dt; if (G.splitT <= 0) $('#split').classList.add('hidden'); }
   if (G.msgT > 0) { G.msgT -= dt; if (G.msgT <= 0) $('#msg').textContent = ''; }
   engineSound(sp, !paused && mode === 'race', G.lastInp ? G.lastInp.throttle : 0);
+  if (G.online) NET.raceTick(dt);
   if (R.finished && mode === 'race') { G.finT += dt; if (G.finT > 1.1) showFinish(); }
 }
 function onRaceEvent(e) {
@@ -1314,7 +1340,8 @@ function onRaceEvent(e) {
     s.classList.remove('hidden', 'better', 'worse'); s.textContent = '🏁 ' + fmt(e.time) + (G.best != null ? '  ' + fmtDiff(e.time - G.best) : '');
     if (G.best != null) s.classList.add(e.time <= G.best ? 'better' : 'worse');
     G.splitT = 3;
-    if (!G.test) {
+    if (G.online) NET.finished(e.time);
+    if (!G.test && !G.online) {
       G.lastRun = { n: settings.name || 'Spieler', t: e.time, s: G.R.splits.slice(), d: Date.now(), g: encGhost(Float32Array.from(G.rec)) };
       G.runs = saveRun(G.track, G.lastRun);
     }
@@ -1322,6 +1349,7 @@ function onRaceEvent(e) {
   else if (e.type === 'fall') { camState.snap = true; $('#msg').textContent = '📍 Zurück zum Checkpoint'; G.msgT = 1.2; G.prevP.set(...G.R.car.p); basisQuat(G.R.car.f, G.R.car.u, G.prevQ); }
 }
 function showFinish() {
+  if (G.online) return showOnlineFinish();
   mode = 'finish'; setHud(false); $('#topBtns').classList.add('hidden'); show('finish'); engineSound(0, false, 0);
   const t = G.R.finishTime, tr = G.track;
   $('#fTitle').textContent = '🏁 ' + tr.name;
@@ -1399,11 +1427,12 @@ function updateChaseCam(pos, q, speed, dt) {
   placeSun(pos);
   camState.snap = false;
 }
-$('#bCam').onclick = cycleCam; $('#bCp').onclick = () => toCheckpoint(); $('#bRestart').onclick = () => restartRace(); $('#bPause').onclick = () => { if (mode === 'replay') endReplay(); else togglePause(); };
+$('#bCam').onclick = cycleCam; $('#bCp').onclick = () => toCheckpoint(); $('#bRestart').onclick = () => { if (G && G.online) toCheckpoint(); else restartRace(); }; $('#bPause').onclick = () => { if (mode === 'replay') endReplay(); else togglePause(); };
 
 // ---------- Hauptmenü-Szene ----------
 let menuT = 0, menuTrack = null, menuCar = null;
 function goMenu() {
+  if (NET.active && mode !== 'lobby') NET.leave();
   endRace(); edLeave(); mode = 'menu'; show('menu'); setHud(false); $('#editorUI').classList.add('hidden');
   setupMenuScene(Math.floor(Math.random() * OFFICIAL.length));
 }
@@ -1745,6 +1774,204 @@ $('#edDel').onclick = () => { ED.del = !ED.del; openEditorBar(); edPreviewBuild(
 $('#edFine').onclick = () => { ED.fine = !ED.fine; edRebuild(); openEditorBar(); };
 $('#edCamL').onclick = () => { ED.cam.yaw += Math.PI / 4; }; $('#edCamR').onclick = () => { ED.cam.yaw -= Math.PI / 4; };
 
+
+// ---------- Online-Rennen (PeerJS, direkt zwischen den Geräten) ----------
+const PEER_URL = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+const NET = {
+  active: false, isHost: false, code: '', peer: null, conns: new Map(), conn: null, myId: '', state: null, remotes: new Map(), sendT: 0, relayT: 0, latest: {},
+  log(t) { $('#onStatus').textContent = t; },
+  loadLib() {
+    if (window.Peer) return Promise.resolve();
+    return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = PEER_URL; sc.onload = res; sc.onerror = () => rej(new Error('PeerJS konnte nicht geladen werden')); document.head.appendChild(sc); });
+  },
+  me() { return { id: this.myId, name: (settings.name || 'Spieler').slice(0, 16), car: { body: carCfg.body, accent: carCfg.accent, pattern: carCfg.pattern, rim: carCfg.rim, rimColor: carCfg.rimColor, number: carCfg.number } }; },
+  async create() {
+    try { this.log('⏳ Verbinde …'); await this.loadLib(); } catch (e) { this.log('⚠️ ' + e.message); return; }
+    const tryOpen = () => {
+      const code = Array.from({ length: 5 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+      const peer = new Peer('prush-' + code);
+      peer.on('open', id => {
+        Object.assign(this, { active: true, isHost: true, code, peer, myId: id, conns: new Map() });
+        this.state = { phase: 'lobby', track: { official: 0 }, players: [this.me()], results: [], raceId: 0 };
+        peer.on('connection', c => this.hostConn(c));
+        openLobby();
+      });
+      peer.on('error', err => { if (err.type === 'unavailable-id') { peer.destroy(); tryOpen(); } else { this.log('⚠️ Verbindungsfehler: ' + err.type); toast('⚠️ Online-Fehler: ' + err.type); } });
+      peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+    };
+    tryOpen();
+  },
+  async join(code) {
+    code = code.trim().toUpperCase(); if (code.length < 4) { this.log('⚠️ Bitte Code eingeben'); return; }
+    try { this.log('⏳ Verbinde …'); await this.loadLib(); } catch (e) { this.log('⚠️ ' + e.message); return; }
+    const peer = new Peer();
+    peer.on('open', id => {
+      Object.assign(this, { active: true, isHost: false, code, peer, myId: id });
+      const c = peer.connect('prush-' + code, { reliable: true });
+      this.conn = c;
+      const to = setTimeout(() => { if (!this.state) { this.log('⚠️ Raum nicht gefunden'); this.leave(true); } }, 9000);
+      c.on('open', () => c.send({ t: 'hello', p: this.me() }));
+      c.on('data', d => { clearTimeout(to); this.clientMsg(d); });
+      c.on('close', () => { if (this.active) { toast('🚪 Der Host hat den Raum verlassen'); this.leave(); goMenu(); } });
+    });
+    peer.on('error', err => { this.log(err.type === 'peer-unavailable' ? '⚠️ Raum „' + code + '“ nicht gefunden' : '⚠️ Verbindungsfehler: ' + err.type); if (err.type === 'peer-unavailable') this.leave(true); });
+  },
+  hostConn(c) {
+    c.on('data', d => this.hostMsg(c, d));
+    c.on('close', () => { this.conns.delete(c.peer); this.state.players = this.state.players.filter(p => p.id !== c.peer); this.removeRemote(c.peer); this.broadcastState(); });
+  },
+  hostMsg(c, d) {
+    const st = this.state;
+    if (d.t === 'hello') {
+      if (st.players.length >= 8) { c.send({ t: 'full' }); setTimeout(() => c.close(), 300); return; }
+      this.conns.set(c.peer, c);
+      const p = Object.assign(d.p, { id: c.peer }); st.players = st.players.filter(x => x.id !== c.peer); st.players.push(p);
+      this.broadcastState(); toast('👋 ' + p.name + ' ist beigetreten', 1200);
+      if (st.phase === 'race') c.send({ t: 'start', track: this.trackPayload(), raceId: st.raceId, late: true });
+    } else if (d.t === 'pos') this.latest[c.peer] = d.a;
+    else if (d.t === 'fin') { if (!st.results.some(r => r.id === c.peer)) { st.results.push({ id: c.peer, time: d.time }); this.broadcastState(); } }
+    else if (d.t === 'car') { const p = st.players.find(x => x.id === c.peer); if (p) { Object.assign(p, d.p, { id: c.peer }); this.broadcastState(); } }
+  },
+  clientMsg(d) {
+    if (d.t === 'state') {
+      const prev = this.state; this.state = d.s;
+      if (mode === 'lobby' || (!prev && d.s.phase === 'lobby')) openLobby();
+      if (d.s.phase === 'lobby' && prev && prev.phase === 'race' && G && G.online) { endRace(); openLobby(); }
+      if (mode === 'finish' && G && G.online) showOnlineFinish();
+    } else if (d.t === 'start') this.beginRace(d.track, d.raceId);
+    else if (d.t === 'snap') { for (const id in d.s) if (id !== this.myId) this.latest[id] = d.s[id]; }
+    else if (d.t === 'full') { toast('⚠️ Der Raum ist voll (max. 8)'); this.leave(); goMenu(); }
+  },
+  broadcastState() { if (!this.isHost) return; for (const c of this.conns.values()) if (c.open) c.send({ t: 'state', s: this.state }); if (mode === 'lobby') openLobby(); if (mode === 'finish' && G && G.online) showOnlineFinish(); },
+  trackPayload() { const tr = this.state.track; return tr.official != null ? { official: tr.official } : tr; },
+  resolveTrack(t) { if (t.official != null) return officialTrack(t.official); return JSON.parse(JSON.stringify(t)); },
+  hostStart() {
+    const st = this.state; st.phase = 'race'; st.results = []; st.raceId++;
+    this.broadcastState();
+    for (const c of this.conns.values()) if (c.open) c.send({ t: 'start', track: this.trackPayload(), raceId: st.raceId });
+    this.beginRace(this.trackPayload(), st.raceId);
+  },
+  hostToLobby() { const st = this.state; st.phase = 'lobby'; this.broadcastState(); endRace(); openLobby(); },
+  beginRace(t, raceId) {
+    endRace(); this.latest = {}; this.raceId = raceId;
+    const tr = this.resolveTrack(t); show(null);
+    startRace(tr, { online: true });
+    $('#ghostInfo').textContent = '🌐 Raum ' + this.code + ' · ' + (this.state ? this.state.players.length : 1) + ' Spieler';
+  },
+  finished(time) {
+    if (this.isHost) { if (!this.state.results.some(r => r.id === this.myId)) { this.state.results.push({ id: this.myId, time }); this.broadcastState(); } }
+    else if (this.conn && this.conn.open) this.conn.send({ t: 'fin', time });
+  },
+  myPacket() {
+    const c = G.car, q = c.quaternion, r2 = x => Math.round(x * 100) / 100, r3 = x => Math.round(x * 1000) / 1000;
+    return [r2(c.position.x), r2(c.position.y), r2(c.position.z), r3(q.x), r3(q.y), r3(q.z), r3(q.w), G.R.cps.size, G.R.finished ? 1 : 0, G.R.car.drifting ? 1 : 0];
+  },
+  raceTick(dt) {
+    if (!this.active || !G) return;
+    this.sendT += dt;
+    if (this.sendT > 1 / 15) {
+      this.sendT = 0; const a = this.myPacket();
+      if (this.isHost) { this.latest[this.myId] = a; const snap = {}; for (const id in this.latest) snap[id] = this.latest[id]; for (const c of this.conns.values()) if (c.open) c.send({ t: 'snap', s: snap }); }
+      else if (this.conn && this.conn.open) this.conn.send({ t: 'pos', a });
+    }
+    // fremde Autos darstellen (ohne Zusammenstoß – man fährt durcheinander durch)
+    const players = (this.state && this.state.players) || [];
+    for (const id in this.latest) {
+      if (id === this.myId) continue;
+      const pl = players.find(p => p.id === id); if (!pl) continue;
+      let r = this.remotes.get(id);
+      if (!r) { const mesh = makeCar(Object.assign({}, carCfg, pl.car || {}), false); mesh.add(nameTag(pl.name)); scene.add(mesh); r = { mesh, init: false }; this.remotes.set(id, r); }
+      const a = this.latest[id], tp = new THREE.Vector3(a[0], a[1], a[2]), tq = new THREE.Quaternion(a[3], a[4], a[5], a[6]).normalize();
+      if (!r.init || r.mesh.position.distanceTo(tp) > 30) { r.mesh.position.copy(tp); r.mesh.quaternion.copy(tq); r.init = true; }
+      else { const k = 1 - Math.exp(-14 * dt); r.mesh.position.lerp(tp, k); r.mesh.quaternion.slerp(tq, k); }
+      const sp = r.last ? r.last.distanceTo(r.mesh.position) / Math.max(dt, 1e-3) : 0; r.last = r.mesh.position.clone();
+      animateWheels(r.mesh, 0, sp, dt);
+    }
+    for (const [id] of this.remotes) if (!players.some(p => p.id === id)) this.removeRemote(id);
+  },
+  removeRemote(id) { const r = this.remotes.get(id); if (r) { scene.remove(r.mesh); this.remotes.delete(id); } delete this.latest[id]; },
+  clearRemotes() { for (const id of [...this.remotes.keys()]) this.removeRemote(id); },
+  leave(quiet) {
+    this.clearRemotes();
+    try { if (this.conn) this.conn.close(); for (const c of this.conns.values()) c.close(); if (this.peer) this.peer.destroy(); } catch (e) {}
+    Object.assign(this, { active: false, isHost: false, peer: null, conn: null, conns: new Map(), state: null, latest: {} });
+    if (!quiet) toast('🚪 Raum verlassen', 1000);
+  },
+};
+function nameTag(name) {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.roundRect ? g.roundRect(4, 8, 248, 48, 16) : g.rect(4, 8, 248, 48); g.fill();
+  g.fillStyle = '#fff'; g.font = '800 30px system-ui,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, 128, 33);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true })); sp.scale.set(3.2, 0.8, 1); sp.position.y = 2.1; sp.renderOrder = 10; return sp;
+}
+function openOnline(code) {
+  endRace(); edLeave(); mode = 'menu'; show('online'); setHud(false); $('#editorUI').classList.add('hidden');
+  if (!menuTrack) setupMenuScene(Math.floor(Math.random() * OFFICIAL.length));
+  $('#onName').value = settings.name; $('#onStatus').textContent = '';
+  if (code) $('#onCode').value = code;
+}
+$('#onName').oninput = () => { settings.name = $('#onName').value.trim() || 'Spieler'; saveSettings(); };
+$('#onBack').onclick = goMenu;
+$('#onCreate').onclick = () => NET.create();
+$('#onJoin').onclick = () => NET.join($('#onCode').value);
+$('#onCode').addEventListener('keydown', e => { if (e.code === 'Enter') NET.join($('#onCode').value); });
+function trackName(t) { return t.official != null ? OFFICIAL[t.official].name : (t.name || 'Eigene Strecke'); }
+function openLobby() {
+  if (!NET.state) return;
+  if (G) endRace();
+  mode = 'lobby'; show('lobby'); setHud(false);
+  if (!menuTrack) setupMenuScene(Math.floor(Math.random() * OFFICIAL.length));
+  const st = NET.state;
+  $('#lbCode').textContent = NET.code;
+  $('#lbCount').textContent = st.players.length;
+  const lt = $('#lbTrack'); lt.innerHTML = '';
+  if (NET.isHost) {
+    const sel = el('select'); sel.style.width = '100%';
+    for (const env of ['summer', 'winter', 'desert']) {
+      const og = el('optgroup'); og.label = ENVS[env].icon + ' ' + ENVS[env].name;
+      OFFICIAL.forEach((o, i) => { if (o.env === env) { const op = el('option', '', '#' + (i + 1) + ' ' + esc(o.name)); op.value = 'o' + i; og.appendChild(op); } });
+      sel.appendChild(og);
+    }
+    const mine = myTracks(); if (mine.length) { const og = el('optgroup'); og.label = '🛠️ Eigene'; mine.forEach(t => { const op = el('option', '', esc(t.name)); op.value = 'c' + t.id; og.appendChild(op); }); sel.appendChild(og); }
+    sel.value = st.track.official != null ? 'o' + st.track.official : 'c' + st.track.id;
+    sel.onchange = () => { const v = sel.value; st.track = v[0] === 'o' ? { official: +v.slice(1) } : JSON.parse(JSON.stringify(myTracks().find(t => 'c' + t.id === v))); NET.broadcastState(); };
+    lt.appendChild(sel);
+    const rnd = el('button', 'btn small', '🎲 Zufällige Strecke'); rnd.style.marginTop = '8px'; rnd.onclick = () => { st.track = { official: Math.floor(Math.random() * OFFICIAL.length) }; NET.broadcastState(); }; lt.appendChild(rnd);
+  } else lt.innerHTML = '<div class="card" style="cursor:default"><div class="nm">' + esc(trackName(st.track)) + '</div><div class="pb">Der Host wählt die Strecke</div></div>';
+  const lp = $('#lbPlayers'); lp.innerHTML = '';
+  st.players.forEach((p, i) => {
+    const r = el('div', 'row'); r.style.cssText = 'padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.06);margin:4px 0';
+    r.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border-radius:5px;background:' + esc((p.car && p.car.body) || '#888') + '"></span><b>' + esc(p.name) + '</b>' + (i === 0 ? ' 👑 Host' : '') + (p.id === NET.myId ? ' <span style="opacity:.6">(du)</span>' : '');
+    lp.appendChild(r);
+  });
+  $('#lbStart').classList.toggle('hidden', !NET.isHost);
+  $('#lbInfo').textContent = NET.isHost ? 'Teile den Code mit deinen Freunden. Sie wählen „🌐 Online → Beitreten“.' : '⏳ Warte, bis der Host das Rennen startet …';
+}
+$('#lbLeave').onclick = () => { NET.leave(); goMenu(); };
+$('#lbStart').onclick = () => NET.hostStart();
+$('#lbCopy').onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(NET.code) : Promise.reject()).then(() => toast('📋 Code kopiert: ' + NET.code)).catch(() => toast('Code: ' + NET.code)); };
+$('#lbLink').onclick = () => { const url = location.origin + location.pathname + '#raum=' + NET.code; (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('🔗 Einladungslink kopiert')).catch(() => toast(url, 4000)); };
+function showOnlineFinish() {
+  mode = 'finish'; setHud(false); $('#topBtns').classList.add('hidden'); show('finish'); engineSound(0, false, 0);
+  const st = NET.state || { players: [], results: [] };
+  $('#fTitle').textContent = '🌐 ' + trackName(st.track || {});
+  $('#fTime').textContent = fmt(G.R.finishTime);
+  const res = st.results.slice().sort((a, b) => a.time - b.time), myPos = res.findIndex(r => r.id === NET.myId);
+  $('#fDiff').innerHTML = myPos >= 0 ? ['🥇 1. Platz!', '🥈 2. Platz!', '🥉 3. Platz!'][myPos] || (myPos + 1) + '. Platz' : '';
+  $('#fMedals').textContent = res.length < st.players.length ? '⏳ ' + (st.players.length - res.length) + ' Spieler noch unterwegs …' : '🏁 Alle sind im Ziel!';
+  const lb = $('#fLb'); lb.innerHTML = '';
+  const best = res.length ? res[0].time : 0;
+  res.forEach((r, i) => { const p = st.players.find(x => x.id === r.id); const tr_ = el('tr', r.id === NET.myId ? 'me' : ''); tr_.innerHTML = '<td>' + (i + 1) + '.</td><td style="text-align:left">' + esc(p ? p.name : '?') + '</td><td>' + fmt(r.time) + '</td><td>' + (i ? fmtDiff(r.time - best) : '') + '</td>'; lb.appendChild(tr_); });
+  st.players.filter(p => !res.some(r => r.id === p.id)).forEach(p => { const tr_ = el('tr'); tr_.innerHTML = '<td>–</td><td style="text-align:left">' + esc(p.name) + '</td><td>🏎️ fährt …</td><td></td>'; lb.appendChild(tr_); });
+  const fb = $('#fBtns'); fb.innerHTML = '';
+  const mk = (t, fn, cls = '') => { const b = el('button', 'btn ' + cls, t); b.onclick = fn; fb.appendChild(b); };
+  if (NET.isHost) { mk('🔁 Zurück zur Lobby', () => NET.hostToLobby(), 'main'); mk('⚡ Nochmal starten', () => NET.hostStart()); }
+  else fb.appendChild(el('div', 'sub', '⏳ Der Host startet gleich das nächste Rennen …'));
+  mk('🚪 Verlassen', () => { NET.leave(); goMenu(); });
+}
+addEventListener('beforeunload', () => { if (NET.active) NET.leave(true); });
+
 // ---------- Debug (nur mit #debug in der URL) ----------
 const DEBUG = { auto: false };
 function autoInput(g) {
@@ -1773,6 +2000,7 @@ function frame(now) {
 }
 $('#loading').classList.add('hidden');
 goMenu();
+{ const m = location.hash.match(/raum=([A-Za-z0-9]{4,6})/); if (m) { openOnline(m[1].toUpperCase()); history.replaceState(null, '', location.pathname); } }
 requestAnimationFrame(frame);
 
 </script>
